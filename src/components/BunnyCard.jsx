@@ -31,9 +31,11 @@ const BunnyCard = ({ data, index }) => {
                                         {/* Sold Badge */}
                                         {data.status === "sold" && (
                                             <motion.div
-                                                className="absolute top-2 right-8 font-[Overlock] bg-blue-300 border text-white text-sm font-bold px-3 rounded shadow-3xl z-10"
+                                                whileHover={{ scale: 1.1 }}
+                                                transition={{ duration: 0.3 }}
+                                                className="absolute top-2 right-5"
                                             >
-                                                SOLD
+                                                <img src="/Images/sold_button.svg" className="h-8" alt="" />
                                             </motion.div>
                                         )}
 

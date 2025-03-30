@@ -2,7 +2,7 @@ import React from "react";
 
 const ChickenCard = ({ data }) => {
     return (
-        <div className="w-10/12 mx-auto sm:p-7 rounded-lg text-center">
+        <div className="sm:w-10/12 mx-auto sm:p-7 rounded-lg text-center">
             {/* Title */}
             <div
                 style={{ fontFamily: "Futura LT Book",}}
@@ -19,7 +19,7 @@ const ChickenCard = ({ data }) => {
                         key={index}
                         src={img}
                         alt={`Chicken ${index + 1}`}
-                        className="w-5/6 mx-auto object-cover"
+                        className="w-4/6 sm:w-5/6 mx-auto object-cover"
                     />
                 ))}
             </div>
@@ -31,7 +31,7 @@ const ChickenCard = ({ data }) => {
                         key={index}
                         src={img}
                         alt={`Feature ${index + 1}`}
-                        className="w-5/6 mx-auto  rounded-full  object-cover"
+                        className="w-4/6 sm:w-5/6 mx-auto  rounded-full  object-cover"
                     />
                 ))}
             </div>
@@ -39,7 +39,7 @@ const ChickenCard = ({ data }) => {
             {/* Description */}
             <p
                 style={{ fontFamily: "Open Sans" }}
-                className="text-[#404040] max-w-4xl mx-auto lg:text-lg mt-16 px-1 sm:px-8">
+                className="text-[#404040] max-w-4xl mx-auto lg:text-lg mt-16 px-2 sm:px-8">
                 {data.description}
             </p>
 

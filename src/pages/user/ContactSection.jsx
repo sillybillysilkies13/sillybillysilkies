@@ -49,13 +49,13 @@ const ContactSection = () => {
             {/* Header Section */}
             <div className="text-center bg-[#FFF8F1] py-5 lg:pt-10 px-4">
                 <h1 className="text-2xl lg:text-3xl font-semibold text-[#404040] mb-4 font-[Poppins]">CONTACT US</h1>
-                <p className="text-lg lg:text-xl text-[#404040] max-w-3xl mx-auto font-[Open_Sans]">
+                <p className="sm:text-lg lg:text-xl text-[#404040] max-w-3xl mx-auto font-[Open_Sans]">
                     Need some answers? Feel free to message / call us and we will be more than happy to assist in locating your ideal pet.
                 </p>
-                <p className="text-lg lg:text-xl text-[#404040] max-w-2xl mx-auto mt-4 font-[Open_Sans]">
+                <p className="sm:text-lg lg:text-xl text-[#404040] max-w-2xl mx-auto mt-4 font-[Open_Sans]">
                     Visits to our farm are by prior appointment only due to strict bio-security practices in place.
                 </p>
-                <p className="lg:text-2xl text-[#A2672D] font-semibold mt-12 font-[Inter]">
+                <p className="text-xl lg:text-2xl text-[#A2672D] font-semibold mt-12 font-[Inter]">
                     Throw us a message, we promise to fetch.
                 </p>
                 <hr className="w-10 border-2 mx-auto mt-4" />
@@ -63,7 +63,7 @@ const ContactSection = () => {
 
             <div className="grid grid-cols-1 lg:grid-cols-4 min-h-full">
                 {/* Left Section - Contact Info */}
-                <div className="bg-[#E0BE9A]/80 text-[#4A3628] pl-16 py-8 flex flex-col justify-center">
+                <div className="bg-[#E0BE9A]/80 text-[#4A3628] px-4 sm:pl-16 py-8 flex flex-col justify-center">
                     <div>
                         <h3
                             style={{ fontFamily: "Futura LT Book" }}
@@ -87,7 +87,7 @@ const ContactSection = () => {
 
                 {/* Middle Section - Contact Form */}
                 <div className="bg-[#E0BE9A]/40  col-span-2 flex flex-col justify-center px-4 sm:px-2 py-4">
-                    <form onSubmit={handleSubmit} className="flex flex-col mx-auto sm:w-8/12 justify-end">
+                    <form onSubmit={handleSubmit} className="flex flex-col mx-auto w-full sm:w-8/12 justify-end">
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div className="flex flex-col">
                                 <label className="text-[#000000] font-[Inter] font-light mb-1">First Name</label>
