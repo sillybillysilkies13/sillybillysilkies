@@ -28,7 +28,7 @@ function Footer() {
                 {/* Image 2 - Square */}
                 <div className="w-full  col-span-2 aspect-square">
                     <img
-                        src="/Images/Footer/image2.jpg"
+                        src="/Images/Footer/image2.png"
                         alt="Silkie 2"
                         className="w-full h-full object-cover "
                     />
