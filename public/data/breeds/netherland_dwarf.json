@@ -1,3 +1,118 @@
 {
-  "bunnies": []
+  "bunnies": [
+    {
+      "id": "29b01a23-1951-41f9-a55c-b9f8a90cfc84",
+      "breed": "Netherland Dwarf",
+      "name": "Fuzzy Netherland Dwarf",
+      "gender": "Male",
+      "dob": "2025-02-01",
+      "takeHomeDate": "2025-03-29",
+      "price": "150",
+      "status": "available",
+      "pedigreedParents": "Dam is pedigreed",
+      "color": "Chestnut Vienna Mark",
+      "images": [
+        "/static-images/breeds/netherland_dwarf/29b01a23-1951-41f9-a55c-b9f8a90cfc84-0.jpg",
+        "/static-images/breeds/netherland_dwarf/29b01a23-1951-41f9-a55c-b9f8a90cfc84-1.jpg",
+        "/static-images/breeds/netherland_dwarf/29b01a23-1951-41f9-a55c-b9f8a90cfc84-2.jpg",
+        "/static-images/breeds/netherland_dwarf/29b01a23-1951-41f9-a55c-b9f8a90cfc84-3.jpg"
+      ],
+      "order": 2
+    },
+    {
+      "id": "895849fa-ffa9-4a86-9232-0e24c06e23ac",
+      "breed": "Netherland Dwarf",
+      "name": "Netherland Dwarf",
+      "gender": "Female",
+      "dob": "2025-02-01",
+      "takeHomeDate": "2025-03-29",
+      "price": "180",
+      "status": "available",
+      "pedigreedParents": "Dam is pedigreed",
+      "color": "Chestnut",
+      "images": [
+        "/static-images/breeds/netherland_dwarf/895849fa-ffa9-4a86-9232-0e24c06e23ac-0.jpg",
+        "/static-images/breeds/netherland_dwarf/895849fa-ffa9-4a86-9232-0e24c06e23ac-1.jpg",
+        "/static-images/breeds/netherland_dwarf/895849fa-ffa9-4a86-9232-0e24c06e23ac-2.jpg",
+        "/static-images/breeds/netherland_dwarf/895849fa-ffa9-4a86-9232-0e24c06e23ac-3.jpg"
+      ],
+      "order": 1
+    },
+    {
+      "id": "9d693c6e-1f23-4f06-9d63-823ebd4eac9f",
+      "breed": "Netherland Dwarf",
+      "name": "Netherland Dwarf",
+      "gender": "Male",
+      "dob": "2025-02-01",
+      "takeHomeDate": "2025-03-29",
+      "price": "150",
+      "status": "available",
+      "pedigreedParents": "Sire is pedigreed",
+      "color": "Chestnut (Clean Line)",
+      "images": [
+        "/static-images/breeds/netherland_dwarf/9d693c6e-1f23-4f06-9d63-823ebd4eac9f-0.jpg",
+        "/static-images/breeds/netherland_dwarf/9d693c6e-1f23-4f06-9d63-823ebd4eac9f-1.jpg",
+        "/static-images/breeds/netherland_dwarf/9d693c6e-1f23-4f06-9d63-823ebd4eac9f-2.jpg",
+        "/static-images/breeds/netherland_dwarf/9d693c6e-1f23-4f06-9d63-823ebd4eac9f-3.jpg"
+      ],
+      "order": 4
+    },
+    {
+      "id": "02ebdf14-50be-4287-806b-41f2cf267a2b",
+      "breed": "Netherland Dwarf",
+      "name": "Netherland Dwarf",
+      "gender": "Female",
+      "dob": "2024-12-29",
+      "takeHomeDate": "Ready Now",
+      "price": "150",
+      "status": "available",
+      "pedigreedParents": "Sire is Pedigreed",
+      "color": "Orange",
+      "images": [
+        "/static-images/breeds/netherland_dwarf/02ebdf14-50be-4287-806b-41f2cf267a2b-0.jpg",
+        "/static-images/breeds/netherland_dwarf/02ebdf14-50be-4287-806b-41f2cf267a2b-1.jpg",
+        "/static-images/breeds/netherland_dwarf/02ebdf14-50be-4287-806b-41f2cf267a2b-2.jpg",
+        "/static-images/breeds/netherland_dwarf/02ebdf14-50be-4287-806b-41f2cf267a2b-3.jpg"
+      ],
+      "order": 3
+    },
+    {
+      "id": "7c2efa7d-0bc9-461a-bb1a-fdc3737cdab6",
+      "breed": "Netherland Dwarf",
+      "name": "Netherland Dwarf",
+      "gender": "Female",
+      "dob": "2024-02-01",
+      "takeHomeDate": "Ready Now",
+      "price": "150",
+      "status": "available",
+      "pedigreedParents": "Dam is Pedigreed",
+      "color": "Chestnut",
+      "images": [
+        "/static-images/breeds/netherland_dwarf/7c2efa7d-0bc9-461a-bb1a-fdc3737cdab6-0.jpg",
+        "/static-images/breeds/netherland_dwarf/7c2efa7d-0bc9-461a-bb1a-fdc3737cdab6-1.jpg",
+        "/static-images/breeds/netherland_dwarf/7c2efa7d-0bc9-461a-bb1a-fdc3737cdab6-2.jpg",
+        "/static-images/breeds/netherland_dwarf/7c2efa7d-0bc9-461a-bb1a-fdc3737cdab6-3.jpg"
+      ],
+      "order": 5
+    },
+    {
+      "id": "361daf40-e8d9-4f99-ae63-e6109db54c4b",
+      "breed": "Netherland Dwarf",
+      "name": "Netherland Dwarf",
+      "gender": "Male",
+      "dob": "2024-12-29",
+      "takeHomeDate": "Ready Now",
+      "price": "150",
+      "status": "available",
+      "pedigreedParents": "Sire is pedigreed",
+      "color": "Chestnut",
+      "images": [
+        "/static-images/breeds/netherland_dwarf/361daf40-e8d9-4f99-ae63-e6109db54c4b-0.jpg",
+        "/static-images/breeds/netherland_dwarf/361daf40-e8d9-4f99-ae63-e6109db54c4b-1.jpg",
+        "/static-images/breeds/netherland_dwarf/361daf40-e8d9-4f99-ae63-e6109db54c4b-2.jpg",
+        "/static-images/breeds/netherland_dwarf/361daf40-e8d9-4f99-ae63-e6109db54c4b-3.jpg"
+      ],
+      "order": 6
+    }
+  ]
 }
