@@ -16,7 +16,7 @@ const AddNewBunny = () => {
         dob: "",
         takeHomeDate: "",
         price: "",
-        status: "",
+        status: "available",
         pedigreedParents: "",
         color: "",
         images: [],
@@ -342,7 +342,7 @@ const AddNewBunny = () => {
                     </div>
 
                     <div>
-                        <label className="block text-[#4A3B2D]">Price (USD)</label>
+                        <label className="block text-[#4A3B2D]">Price</label>
                         <input
                             type="number"
                             name="price"
