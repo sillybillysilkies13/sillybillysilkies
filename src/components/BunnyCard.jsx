@@ -7,7 +7,7 @@ import { Pagination, Autoplay } from "swiper/modules";
 
 const BunnyCard = ({ data, index }) => {
     return (
-        <div className="sm:max-w-5xl sm:mx-auto sm:py-6 sm:px-16">
+        <div className="sm:max-w-5xl sm:mx-auto sm:py-6 sm:px-12">
             {/* Ensure flex-row and alternate layout for odd and even indexes */}
             <div className={`flex flex-col sm:flex-row ${index % 2 === 0 ? "sm:flex-row" : "sm:flex-row-reverse"} ${index % 2 === 0 ? "sm:space-x-12" : "sm:ml-5"} items-center`}>
 
@@ -74,14 +74,14 @@ const BunnyCard = ({ data, index }) => {
 
 
                 {/* Text Section */}
-                <div style={{ fontFamily: "Futura LT Light, sans-serif" }} className="mt-4 sm:mt-0 sm:w-1/2 text-[#404040] flex flex-col text-lg sm:text-2xl space-y-9">
+                <div style={{ fontFamily: "Futura LT Light, sans-serif" }} className="mt-4 sm:mt-0 sm:w-1/2 text-black flex flex-col text-lg sm:text-2xl space-y-9">
                     <p>Breed: {data.breed}</p>
                     <p>Pedigreed Parents: {data.pedigreedParents}</p>
                     <p>Gender: {data.gender}</p>
                     <p>Color: {data.color}</p>
                     <p>Date of Birth: {data.dob}</p>
                     <p>Take home date: {data.takeHomeDate}</p>
-                    <p>Price: $ {data.price}</p>
+                    <p>Price: ${data.price}</p>
                 </div>
             </div>
 

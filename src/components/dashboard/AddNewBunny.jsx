@@ -4,13 +4,13 @@ import { CircleArrowLeft } from 'lucide-react';
 import { X } from "lucide-react";
 
 const AddNewBunny = () => {
-    const { id } = useParams(); // Get bunny ID from URL (if editing)
-    const location = useLocation(); // Get state from navigation
+    const { id } = useParams();
+    const location = useLocation();
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
     const [bunny, setBunny] = useState({
-        breed: "",
+        breed: "Netherland Dwarf", // Default to Netherland Dwarf
         name: "",
         gender: "",
         dob: "",
@@ -21,9 +21,9 @@ const AddNewBunny = () => {
         color: "",
         images: [],
     });
-    
+
     useEffect(() => {
-        const isFormComplete = bunny.breed && bunny.name && bunny.gender && bunny.dob && bunny.takeHomeDate && bunny.price;
+        const isFormComplete = bunny.breed && bunny.gender && bunny.dob && bunny.takeHomeDate && bunny.price;
 
         const handleBeforeUnload = (event) => {
             if (isFormComplete) {
@@ -58,15 +58,14 @@ const AddNewBunny = () => {
             window.removeEventListener("beforeunload", handleBeforeUnload);
             document.removeEventListener("click", handleNavigation, true);
         };
-    }, [bunny, setBunny]); // Add setBunny to dependencies
-
+    }, [bunny, setBunny]);
 
     useEffect(() => {
         if (id && location.state?.bunny) {
-            // Use the data passed from Manage Listings
             setBunny(location.state.bunny);
         }
     }, [id, location.state]);
+
     useEffect(() => {
         window.scrollTo({ top: 0, behavior: "smooth" });
     }, [currentPage]);
@@ -90,15 +89,14 @@ const AddNewBunny = () => {
     };
 
     const handleSubmit = async () => {
-        if (!bunny.breed || !bunny.name || !bunny.gender || !bunny.dob || !bunny.takeHomeDate || !bunny.price) {
+        if (!bunny.breed || !bunny.gender || !bunny.dob || !bunny.takeHomeDate || !bunny.price) {
             alert("Please fill all required fields!");
             return;
         }
-        setLoading(true); // Start loading spinner
+        setLoading(true);
 
         try {
             if (id) {
-                // 🟢 **Update Existing Bunny** (Send Full Data as JSON)
                 const updatedData = {
                     id: id,
                     pageType: `breeds/${bunny.breed.toLowerCase().replace(/\s+/g, "_")}`,
@@ -111,7 +109,7 @@ const AddNewBunny = () => {
                     status: bunny.status,
                     pedigreedParents: bunny.pedigreedParents,
                     color: bunny.color,
-                    images: bunny.images, // Keeping existing image URLs
+                    images: bunny.images,
                 };
 
                 const response = await fetch("https://backend.sillybillysilkies.workers.dev/update", {
@@ -124,7 +122,6 @@ const AddNewBunny = () => {
 
                 alert("Bunny updated successfully!");
             } else {
-                // 🟢 **Create New Bunny** (Send as FormData)
                 const details = JSON.stringify({
                     breed: bunny.breed,
                     name: bunny.name,
@@ -137,19 +134,16 @@ const AddNewBunny = () => {
                     color: bunny.color,
                     images: bunny.images
                 });
-                console.log(details);
 
                 const formData = new FormData();
                 formData.append("details", details);
                 formData.append("pageType", `breeds/${bunny.breed.toLowerCase().replace(/\s+/g, "_")}`);
-                console.log(bunny.images);
 
                 bunny.images.forEach((img) => {
                     if (img instanceof File) {
-                        formData.append("file", img); // ✅ Only append File objects
+                        formData.append("file", img);
                     }
                 });
-
 
                 const response = await fetch("https://backend.sillybillysilkies.workers.dev/upload", {
                     method: "POST",
@@ -173,12 +167,10 @@ const AddNewBunny = () => {
     const handleDeleteImage = async (imageUrl, index) => {
         setLoading(true);
         try {
-            // Prepare the required data
-            const bunnyId = id; // Assuming `id` is coming from `useParams()`
+            const bunnyId = id;
             const pageType = `breeds/${bunny.breed.toLowerCase().replace(/\s+/g, "_")}`;
-            const imageUrls = [imageUrl]; // Backend expects an array of image URLs
+            const imageUrls = [imageUrl];
 
-            // Send DELETE request to backend
             const response = await fetch("https://backend.sillybillysilkies.workers.dev/deleteImage", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -187,7 +179,6 @@ const AddNewBunny = () => {
 
             if (!response.ok) throw new Error("Failed to delete image");
 
-            // Remove the image from state if deleted successfully
             setBunny((prev) => ({
                 ...prev,
                 images: prev.images.filter((_, i) => i !== index),
@@ -196,9 +187,10 @@ const AddNewBunny = () => {
             console.error("Error deleting image:", error);
             alert("Failed to delete image. Please try again.");
         } finally {
-            setLoading(false); // Hide spinner
+            setLoading(false);
         }
     };
+
     const handleback = () => {
         navigate("/admin/manage-listing");
     }
@@ -206,10 +198,7 @@ const AddNewBunny = () => {
     const handleAddImages = async (event) => {
         const files = Array.from(event.target.files);
         if (files.length === 0) return;
-        // Required fields
-        const requiredFields = ["breed", "name", "gender", "dob", "takeHomeDate", "price", "status", "pedigreedParents", "color"];
-
-        // Check if any required field is missing
+        const requiredFields = ["breed", "gender", "dob", "takeHomeDate", "price", "status", "pedigreedParents", "color"];
         const missingFields = requiredFields.filter((field) => !bunny[field]);
 
         if (missingFields.length > 0) {
@@ -230,8 +219,6 @@ const AddNewBunny = () => {
             if (!response.ok) throw new Error("Image upload failed");
 
             const { uploadedUrls } = await response.json();
-
-            // Add new URLs to state
             setBunny((prev) => ({
                 ...prev,
                 images: [...prev.images, ...uploadedUrls],
@@ -240,7 +227,7 @@ const AddNewBunny = () => {
             console.error("Error uploading images:", error);
             alert("Failed to upload images.");
         } finally {
-            setLoading(false); // Hide spinner
+            setLoading(false);
         }
     };
 
@@ -260,8 +247,6 @@ const AddNewBunny = () => {
             if (!response.ok) throw new Error("Failed to delete images from R2");
 
             console.log("Images successfully deleted from R2");
-
-            // Automatically update state inside the function
             setBunny((prev) => ({
                 ...prev,
                 images: prev.images.filter((img) => !imageUrls.includes(img)),
@@ -272,21 +257,21 @@ const AddNewBunny = () => {
             throw error;
         }
     };
+
     const handleCancel = async () => {
         if (bunny.images.length > 0) {
             setLoading(true);
             try {
-                await deleteImagesFromR2(bunny, setBunny); // Pass setBunny as an argument
+                await deleteImagesFromR2(bunny, setBunny);
             } catch (error) {
-                return; // Stop execution if image deletion fails
+                return;
             } finally {
                 setLoading(false);
             }
         }
 
-        // Reset bunny details (images already updated in deleteImagesFromR2)
         setBunny({
-            breed: "",
+            breed: "Netherland Dwarf",
             name: "",
             gender: "",
             dob: "",
@@ -295,7 +280,7 @@ const AddNewBunny = () => {
             status: "",
             pedigreedParents: "",
             color: "",
-            images: [], // Already cleared inside deleteImagesFromR2
+            images: [],
         });
     };
 
@@ -330,51 +315,16 @@ const AddNewBunny = () => {
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                        <label className="block text-[#4A3B2D]">Bunny Name/ID</label>
-                        <input
-                            type="text"
-                            name="name"
-                            value={bunny.name}
-                            placeholder="Enter name or ID"
-                            className="w-full border placeholder:text-[#4A3B2D] border-[#4A3B2D] p-2 rounded"
-                            onChange={handleChange}
-                        />
-                    </div>
-
-                    <div>
-                        <label className="block text-[#4A3B2D]">Gender</label>
-                        <div className="flex gap-4 mt-2">
-                            <label className="flex items-center">
-                                <input
-                                    type="radio"
-                                    name="gender"
-                                    value="Male"
-                                    checked={bunny.gender === "Male"}
-                                    onChange={handleChange}
-                                />
-                                <span className="ml-2">Male</span>
-                            </label>
-                            <label className="flex items-center">
-                                <input
-                                    type="radio"
-                                    name="gender"
-                                    value="Female"
-                                    checked={bunny.gender === "Female"}
-                                    onChange={handleChange}
-                                />
-                                <span className="ml-2">Female</span>
-                            </label>
-                        </div>
-                    </div>
+                  
 
                     <div>
                         <label className="block text-[#4A3B2D]">Date of Birth</label>
                         <input
-                            type="date"
+                            type="text"
                             name="dob"
                             value={bunny.dob}
-                            className="w-full border border-[#4A3B2D] p-2 rounded"
+                            placeholder="Enter date of birth"
+                            className="w-full border placeholder:text-[#4A3B2D] border-[#4A3B2D] p-2 rounded"
                             onChange={handleChange}
                         />
                     </div>
@@ -439,20 +389,32 @@ const AddNewBunny = () => {
                             onChange={handleChange}
                         />
                     </div>
+                    <div>
+                        <label className="block text-[#4A3B2D]">Gender</label>
+                        <div className="flex gap-4 mt-2">
+                            <label className="flex items-center">
+                                <input
+                                    type="radio"
+                                    name="gender"
+                                    value="Male"
+                                    checked={bunny.gender === "Male"}
+                                    onChange={handleChange}
+                                />
+                                <span className="ml-2">Male</span>
+                            </label>
+                            <label className="flex items-center">
+                                <input
+                                    type="radio"
+                                    name="gender"
+                                    value="Female"
+                                    checked={bunny.gender === "Female"}
+                                    onChange={handleChange}
+                                />
+                                <span className="ml-2">Female</span>
+                            </label>
+                        </div>
+                    </div>
                 </div>
-
-
-                {/* <div className="mt-4">
-                    <label className="block text-[#4A3B2D]">Bunny Description</label>
-                    <textarea
-                        name="description"
-                        value={bunny.description}
-                        placeholder="Enter bunny description..."
-                        className="w-full border p-2 rounded"
-                        rows="3"
-                        onChange={handleChange}
-                    ></textarea>
-                </div> */}
 
                 <div className="mt-6 border-dashed border-2 border-[#4A3B2D] rounded-lg p-6 text-center bg-gray-50">
                     <p className="text-[#4A3B2D]">Upload Bunny Images</p>
@@ -479,9 +441,9 @@ const AddNewBunny = () => {
                                                 setLoading(true);
                                                 try {
                                                     if (id) {
-                                                        await handleDeleteImage(imageUrl, index); // Delete from both KV & R2
+                                                        await handleDeleteImage(imageUrl, index);
                                                     } else {
-                                                        await deleteImagesFromR2(bunny, setBunny, imageUrl); // Delete from R2 & update UI
+                                                        await deleteImagesFromR2(bunny, setBunny, imageUrl);
                                                     }
                                                 } catch (error) {
                                                     console.error("Error deleting image:", error);
@@ -494,15 +456,12 @@ const AddNewBunny = () => {
                                         >
                                             <X className="w-4 h-4 text-white" />
                                         </button>
-
                                     </div>
-
                                 );
                             })
                         )}
                     </div>
                 </div>
-
 
                 <div className="mt-6 flex space-x-1 justify-end">
                     {!id && <button

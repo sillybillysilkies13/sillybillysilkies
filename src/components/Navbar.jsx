@@ -55,8 +55,7 @@ function Navbar() {
                         {profileImage && <img src={profileImage} alt="Silly Billy Silkies" className="h-full w-12 sm:w-20 rounded-full" />}
 
                         <h1
-                            style={{ fontFamily: 'Reklame Script Medium' }}
-                            className="text-4xl md:text-7xl font-medium text-[#5B4D43]">
+                            className="text-4xl font-[Cabinet_of_the_Outlander] md:text-6xl font-medium text-red-900">
                             Silly Billy Silkies
                         </h1>
                     </div>
@@ -110,20 +109,20 @@ function Navbar() {
                             <div className="absolute top-full left-1/2 z-50 text-sm transform -translate-x-1/2 bg-[#ffffff] shadow-lg rounded-lg">
                                 <Link
                                     to="/holland_lop"
-                                    className={`block border-b border-[#A2672D] text-center w-32 py-2 hover:bg-[#A2672D] hover:text-white ${isActive("/holland_lop") ? "bg-[#A2672D] border-[#A2672D] text-white" : "hover:text-[#8B5A2B]"}`}
+                                    className={`block border-b border-[#A2672D] text-center w-32 py-2 hover:bg-[#A2672D] hover:text-white`}
                                 >
                                     Holland Lops
                                 </Link>
                                 <Link
                                     to="/netherland_dwarf"
-                                    className={`block border-b border-[#A2672D] text-center w-32 py-2 hover:bg-[#A2672D] hover:text-white ${isActive("/netherland_dwarf") ? "bg-[#A2672D] border-[#A2672D] text-white" : "hover:text-[#8B5A2B]"}`}
+                                    className={`block border-b border-[#A2672D] text-center w-32 py-2 hover:bg-[#A2672D] hover:text-white`}
                                 >
                                     Netherland Dwarf
 
                                 </Link>
                                 <Link
                                     to="/Gallery"
-                                    className={`block text-center w-32 py-2 hover:bg-[#A2672D] hover:text-white ${isActive("/Gallery") ? "bg-[#A2672D] border-[#A2672D] text-white" : "hover:text-[#8B5A2B]"}`}
+                                    className={`block text-center w-32 py-2 hover:bg-[#A2672D] hover:text-white`}
                                 >
                                     Gallery
                                 </Link>

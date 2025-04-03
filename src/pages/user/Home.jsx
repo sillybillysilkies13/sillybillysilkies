@@ -20,7 +20,7 @@ function Home() {
                     </div>
 
                     {/* Content Section */}
-                    <div className="md:col-span-3 flex flex-col justify-center font-[Open_Sans] bg-[#E0BE9A] text-[#404040] leading-relaxed text-md lg:text-lg p-4 lg:px-6 lg:py-16">
+                    <div className="md:col-span-3 flex flex-col justify-center font-[Open_Sans] bg-[#E0BE9A] text-[#404040] leading-relaxed text-md lg:text-lg p-4 lg:pl-10 lg:pr-28 lg:py-16">
                         <p>
                             How did we come to name our humble establishment "Silly Billy Silkies"?
                             It all began with two charismatic Silkie roosters who came into our farm.

@@ -31,7 +31,7 @@ function AdoptionGallery() {
 
     return (
         <>
-            <section className="py-6 lg:py-4 lg:px-6 md:px-16 bg-[#FFF8F1]">
+            <section className="py-6 lg:py-4 lg:px-0 md:px-16 bg-[#FFF8F1]">
                 <h2
                     style={{ fontFamily: "Futura LT W01 Medium" }}
                     className="text-xl md:text-4xl text-[#A2672D] text-center mb-8"
@@ -40,7 +40,7 @@ function AdoptionGallery() {
                 </h2>
 
                 {/* Swiper Carousel */}
-                <div className="relative max-w-8xl pt-8 px-5 overflow-x-visible bg-white mx-auto">
+                <div className="relative  lg:w-11/12 lg:px-10 max-w-8xl pt-8 px-5 overflow-x-visible bg-white mx-auto">
                     {images.length > 0 ? (
                         <>
 

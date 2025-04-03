@@ -64,10 +64,10 @@ const ContactSection = () => {
             <div className="grid grid-cols-1 lg:grid-cols-4 min-h-full">
                 {/* Left Section - Contact Info */}
                 <div className="bg-[#E0BE9A]/80 text-[#4A3628] px-4 sm:pl-16 py-8 flex flex-col justify-center">
-                    <div>
+                    <div className="relative bottom-16"> 
                         <h3
                             style={{ fontFamily: "Futura LT Book" }}
-                            className="text-xl font-normal mb-3 text-[#5B4D43]">Address</h3>
+                            className="text-xl font-normal  text-[#5B4D43]">Address</h3>
                         <div className="font-[Open_Sans] text-black">
                             <p>Silly Billy Silkies</p>
                             <p>Amaranth, ON Canada</p>
@@ -75,12 +75,12 @@ const ContactSection = () => {
 
                         <h3
                             style={{ fontFamily: "Futura LT Book" }}
-                            className="text-xl font-normal mt-6 mb-2 text-[#5B4D43]">Phone</h3>
+                            className="text-xl font-normal mt-6 text-[#5B4D43]">Phone</h3>
                         <p className="font-[Open_Sans] text-black">416-806-3485</p>
 
                         <h3
                             style={{ fontFamily: "Futura LT Book" }}
-                            className="text-xl font-normal mt-6 mb-2 text-[#5B4D43]">Email</h3>
+                            className="text-xl font-normal mt-6  text-[#5B4D43]">Email</h3>
                         <p className="font-[Open_Sans] text-black ">SillyBillySilkies@gmail.com</p>
                     </div>
                 </div>

@@ -32,3 +32,10 @@
     font-weight: normal;
     font-style: normal;
 }
+@font-face {
+    font-family: 'Cabinet of the outlander';
+    src: url('/fonts/Cabinet of the Outlander.ttf') format('truetype');
+    font-weight: 300;
+    /* Light weight */
+    font-style: normal;
+}
