@@ -5,9 +5,11 @@ import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
 import { useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
 
 function AdoptionGallery() {
     const [images, setImages] = useState([]);
+    const [status, setStatus] = useState([]); // Array to store the status of each image
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -17,11 +19,10 @@ function AdoptionGallery() {
                 const data = await response.json();
                 console.log(data);
 
-                // Directly use the URL field from JSON (since it's already absolute)
-                // setImages(data.images.map(image => image.url));
+                // Sort images based on the order field and set the images and status
                 const sortedImages = data.images.sort((a, b) => a.order - b.order);
-                console.log(sortedImages);
-                setImages(sortedImages.map(image=>image.url));
+                setImages(sortedImages.map(image => image.url));
+                setStatus(sortedImages.map(image => image.status)); // Assuming status is part of the JSON data
             } catch (error) {
                 console.error("❌ Error fetching images:", error);
             }
@@ -40,10 +41,9 @@ function AdoptionGallery() {
                 </h2>
 
                 {/* Swiper Carousel */}
-                <div className="relative  lg:w-11/12 lg:px-10 max-w-8xl pt-8 px-5 overflow-x-visible bg-white mx-auto">
+                <div className="relative lg:w-11/12 lg:px-10 max-w-8xl pt-8 px-5 overflow-x-visible bg-white mx-auto">
                     {images.length > 0 ? (
                         <>
-
                             <Swiper
                                 modules={[Navigation, Pagination, Autoplay]}
                                 spaceBetween={20}
@@ -62,11 +62,24 @@ function AdoptionGallery() {
                             >
                                 {images.map((src, index) => (
                                     <SwiperSlide key={index} className="flex justify-center">
-                                        <img
-                                            src={src}
-                                            alt={`Kit ${index + 1}`}
-                                            className="w-full aspect-square object-cover shadow-md"
-                                        />
+                                        <motion.div className="relative w-full">
+                                            {/* Sold Badge */}
+                                            {status[index] === "sold" && (
+                                                <motion.div
+                                                    whileHover={{ scale: 1.1 }}
+                                                    transition={{ duration: 0.3 }}
+                                                    className="absolute top-2 right-5"
+                                                >
+                                                    <img src="/Images/sold_button.svg" className="h-8" alt="Sold" />
+                                                </motion.div>
+                                            )}
+
+                                            <img
+                                                src={src}
+                                                alt={`Kit ${index + 1}`}
+                                                className="w-full aspect-square object-cover shadow-md"
+                                            />
+                                        </motion.div>
                                     </SwiperSlide>
                                 ))}
                             </Swiper>
@@ -92,7 +105,6 @@ function AdoptionGallery() {
                     <img src="/Images/Homepage/button2hover.svg" alt="button2-hover" className="absolute inset-0  opacity-0 transition-opacity duration-300 hover:opacity-100" />
                 </div>
             </section>
-
         </>
     );
 }

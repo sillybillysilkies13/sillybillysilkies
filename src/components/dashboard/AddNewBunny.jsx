@@ -1,7 +1,56 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
-import { CircleArrowLeft } from 'lucide-react';
-import { X } from "lucide-react";
+import { CircleArrowLeft, GripVertical, X } from "lucide-react";
+import {
+    DndContext,
+    closestCenter,
+    KeyboardSensor,
+    PointerSensor,
+    useSensor,
+    useSensors
+} from "@dnd-kit/core";
+import {
+    arrayMove,
+    SortableContext,
+    sortableKeyboardCoordinates,
+    useSortable,
+    verticalListSortingStrategy
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+
+// Sortable Image Component
+const SortableImage = ({ img, index, onDelete }) => {
+    const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id: img });
+
+    const style = {
+        transform: CSS.Transform.toString(transform),
+        transition,
+    };
+
+    return (
+        <div
+            ref={setNodeRef}
+            style={style}
+            className="relative w-64 h-64 sm:w-64 sm:h-64 mt-4 rounded-lg overflow-visible border flex flex-col"
+        >
+            <div className="flex items-center justify-between p-1 bg-gray-50 border-b">
+                <div {...attributes} {...listeners} className="cursor-grab p-1">
+                    <GripVertical className="w-4 h-4 text-gray-500" />
+                </div>
+                <span className="text-xs text-gray-500">Image {index + 1}</span>
+            </div>
+            <div className="flex-grow">
+                <img src={img} alt="Preview" className="w-full h-full object-cover" />
+            </div>
+            <button
+                onClick={() => onDelete(img)}
+                className="absolute top-0 right-0 translate-x-1/2 -translate-y-1/2 bg-[#754E1A] text-white rounded-full text-xs p-1"
+            >
+                <X className="w-4 h-4 text-white" />
+            </button>
+        </div>
+    );
+};
 
 const AddNewBunny = () => {
     const { id } = useParams();
@@ -10,7 +59,7 @@ const AddNewBunny = () => {
     const [loading, setLoading] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
     const [bunny, setBunny] = useState({
-        breed: "Netherland Dwarf", // Default to Netherland Dwarf
+        breed: "Netherland Dwarf",
         name: "",
         gender: "",
         dob: "",
@@ -21,33 +70,43 @@ const AddNewBunny = () => {
         color: "",
         images: [],
     });
+    const [isSubmitted, setIsSubmitted] = useState(false);
+    const isMounted = useRef(true);
 
+    // Setup dnd-kit sensors
+    const sensors = useSensors(
+        useSensor(PointerSensor),
+        useSensor(KeyboardSensor, {
+            coordinateGetter: sortableKeyboardCoordinates
+        })
+    );
+
+    // Handle navigation prompts and cleanup on unmount only
     useEffect(() => {
-        const isFormComplete = bunny.breed && bunny.gender && bunny.dob && bunny.takeHomeDate && bunny.price;
+        isMounted.current = true;
 
         const handleBeforeUnload = (event) => {
-            if (isFormComplete) {
+            if (bunny.images.length > 0 && !isSubmitted) {
                 event.preventDefault();
-                event.returnValue = "You have unsaved changes. Do you really want to leave?";
+                event.returnValue = "You have unsaved images. Do you really want to leave?";
             }
         };
 
         const handleNavigation = async (event) => {
             const targetLink = event.target.closest("a");
 
-            if (isFormComplete && targetLink) {
+            if (bunny.images.length > 0 && !isSubmitted && targetLink) {
                 event.preventDefault();
-                const userConfirmed = window.confirm("You have unsaved changes. Do you want to save before leaving?");
+                const userConfirmed = window.confirm("You have unsaved images. Do you want to save before leaving?");
 
                 if (userConfirmed) {
-                    console.log("Bunny saving...");
+                    console.log("Saving bunny...");
                     await handleSubmit();
-                } else if (bunny.images.length > 0) {
+                } else {
                     console.log("Deleting images from R2...");
                     await deleteImagesFromR2(bunny, setBunny);
+                    navigate(targetLink.pathname + targetLink.search);
                 }
-
-                navigate(targetLink.pathname + targetLink.search);
             }
         };
 
@@ -57,8 +116,21 @@ const AddNewBunny = () => {
         return () => {
             window.removeEventListener("beforeunload", handleBeforeUnload);
             document.removeEventListener("click", handleNavigation, true);
+            isMounted.current = false;
         };
-    }, [bunny, setBunny]);
+    }, []); // Empty dependency array to run only on mount/unmount
+
+    // Cleanup effect separated with no dependencies
+    useEffect(() => {
+        return () => {
+            if (bunny.images.length > 0 && !isSubmitted && !isMounted.current) {
+                console.log("Cleanup on unmount triggered");
+                deleteImagesFromR2(bunny, setBunny).catch((error) => {
+                    console.error("Error during cleanup on unmount:", error);
+                });
+            }
+        };
+    }, []); // Empty dependency array ensures cleanup only on unmount
 
     useEffect(() => {
         if (id && location.state?.bunny) {
@@ -78,14 +150,54 @@ const AddNewBunny = () => {
         setBunny({ ...bunny, breed: selectedBreed });
     };
 
-    const handleImageUpload = (e) => {
-        const files = Array.from(e.target.files);
-        setBunny({ ...bunny, images: [...bunny.images, ...files] });
+    const handleAddImages = async (event) => {
+        const files = Array.from(event.target.files);
+        if (files.length === 0) return;
+
+        setLoading(true);
+        const formData = new FormData();
+        formData.append("pageType", `breeds/${bunny.breed.toLowerCase().replace(/\s+/g, "_")}`);
+        files.forEach((file) => formData.append("files", file));
+
+        try {
+            const response = await fetch("https://backend.sillybillysilkies.workers.dev/addImages", {
+                method: "POST",
+                body: formData,
+            });
+
+            if (!response.ok) throw new Error(`Image upload failed! Status: ${response.status}`);
+
+            const data = await response.json();
+            const uploadedUrls = data.uploadedUrls || [];
+            console.log("Uploaded URLs:", uploadedUrls);
+
+            setBunny((prev) => ({
+                ...prev,
+                images: [...prev.images, ...uploadedUrls],
+            }));
+        } catch (error) {
+            console.error("Error uploading images:", error);
+            alert("Failed to upload images. Please try again.");
+        } finally {
+            setLoading(false);
+        }
     };
 
-    const removeImage = (index) => {
-        const updatedImages = bunny.images.filter((_, i) => i !== index);
-        setBunny({ ...bunny, images: updatedImages });
+    // Handle drag end for sorting images
+    const handleDragEnd = (event) => {
+        const { active, over } = event;
+
+        if (active.id !== over.id) {
+            setBunny((prev) => {
+                const oldIndex = prev.images.indexOf(active.id);
+                const newIndex = prev.images.indexOf(over.id);
+
+                return {
+                    ...prev,
+                    images: arrayMove(prev.images, oldIndex, newIndex),
+                };
+            });
+        }
     };
 
     const handleSubmit = async () => {
@@ -120,6 +232,9 @@ const AddNewBunny = () => {
 
                 if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
 
+                // Update the image order in KV
+                await updateImagesOrder(bunny.images, id, `breeds/${bunny.breed.toLowerCase().replace(/\s+/g, "_")}`);
+
                 alert("Bunny updated successfully!");
             } else {
                 const details = JSON.stringify({
@@ -132,7 +247,7 @@ const AddNewBunny = () => {
                     status: bunny.status,
                     pedigreedParents: bunny.pedigreedParents,
                     color: bunny.color,
-                    images: bunny.images
+                    images: bunny.images,
                 });
 
                 const formData = new FormData();
@@ -152,9 +267,15 @@ const AddNewBunny = () => {
 
                 if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
 
+                const responseData = await response.json();
+
+                // Update the image order in KV with the new bunny ID
+                await updateImagesOrder(bunny.images, responseData.id, `breeds/${bunny.breed.toLowerCase().replace(/\s+/g, "_")}`);
+
                 alert("Bunny added successfully!");
             }
 
+            setIsSubmitted(true);
             navigate("/admin/manage-listing");
         } catch (error) {
             console.error("Error submitting data:", error);
@@ -164,68 +285,58 @@ const AddNewBunny = () => {
         }
     };
 
-    const handleDeleteImage = async (imageUrl, index) => {
-        setLoading(true);
+    // Function to update image order in KV storage
+    const updateImagesOrder = async (images, bunnyId, pageType) => {
         try {
-            const bunnyId = id;
-            const pageType = `breeds/${bunny.breed.toLowerCase().replace(/\s+/g, "_")}`;
-            const imageUrls = [imageUrl];
+            // Create array of ordered images with indices
+            const orderedImages = images.map((url, index) => ({ url, order: index }));
 
-            const response = await fetch("https://backend.sillybillysilkies.workers.dev/deleteImage", {
+            const response = await fetch("https://backend.sillybillysilkies.workers.dev/updateBunnyImagesOrder", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ bunnyId, pageType, imageUrls }),
+                body: JSON.stringify({
+                    bunnyId,
+                    pageType,
+                    orderedImages
+                }),
             });
 
-            if (!response.ok) throw new Error("Failed to delete image");
+            if (!response.ok) {
+                throw new Error("Failed to update image order");
+            }
 
-            setBunny((prev) => ({
-                ...prev,
-                images: prev.images.filter((_, i) => i !== index),
-            }));
+            console.log("Image order updated successfully");
         } catch (error) {
-            console.error("Error deleting image:", error);
-            alert("Failed to delete image. Please try again.");
-        } finally {
-            setLoading(false);
+            console.error("Error updating image order:", error);
         }
     };
 
-    const handleback = () => {
-        navigate("/admin/manage-listing");
-    }
-
-    const handleAddImages = async (event) => {
-        const files = Array.from(event.target.files);
-        if (files.length === 0) return;
-        const requiredFields = ["breed", "gender", "dob", "takeHomeDate", "price", "status", "pedigreedParents", "color"];
-        const missingFields = requiredFields.filter((field) => !bunny[field]);
-
-        if (missingFields.length > 0) {
-            alert(`Please fill in the following details before uploading images: ${missingFields.join(", ")}`);
-            return;
-        }
+    const handleDeleteImage = async (imageUrl) => {
         setLoading(true);
-        const formData = new FormData();
-        formData.append("pageType", `breeds/${bunny.breed.toLowerCase().replace(/\s+/g, "_")}`);
-        files.forEach((file) => formData.append("files", file));
-
         try {
-            const response = await fetch("https://backend.sillybillysilkies.workers.dev/addImages", {
-                method: "POST",
-                body: formData,
-            });
+            if (id) {
+                const bunnyId = id;
+                const pageType = `breeds/${bunny.breed.toLowerCase().replace(/\s+/g, "_")}`;
+                const imageUrls = [imageUrl];
 
-            if (!response.ok) throw new Error("Image upload failed");
+                const response = await fetch("https://backend.sillybillysilkies.workers.dev/deleteImage", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ bunnyId, pageType, imageUrls }),
+                });
 
-            const { uploadedUrls } = await response.json();
-            setBunny((prev) => ({
-                ...prev,
-                images: [...prev.images, ...uploadedUrls],
-            }));
+                if (!response.ok) throw new Error("Failed to delete image");
+
+                setBunny((prev) => ({
+                    ...prev,
+                    images: prev.images.filter((img) => img !== imageUrl),
+                }));
+            } else {
+                await deleteImagesFromR2(bunny, setBunny, imageUrl);
+            }
         } catch (error) {
-            console.error("Error uploading images:", error);
-            alert("Failed to upload images.");
+            console.error("Error deleting image:", error);
+            alert("Failed to delete image. Please try again.");
         } finally {
             setLoading(false);
         }
@@ -236,7 +347,9 @@ const AddNewBunny = () => {
 
         try {
             const pageType = `breeds/${bunny.breed.toLowerCase().replace(/\s+/g, "_")}`;
-            const imageUrls = imageUrlToDelete ? [imageUrlToDelete] : bunny.images;
+            const imageUrls = imageUrlToDelete ? [imageUrlToDelete] : bunny.images.filter(img => typeof img === "string");
+
+            if (imageUrls.length === 0) return;
 
             const response = await fetch("https://backend.sillybillysilkies.workers.dev/deleteImageR2", {
                 method: "POST",
@@ -246,14 +359,13 @@ const AddNewBunny = () => {
 
             if (!response.ok) throw new Error("Failed to delete images from R2");
 
-            console.log("Images successfully deleted from R2");
+            console.log("Images successfully deleted from R2:", imageUrls);
             setBunny((prev) => ({
                 ...prev,
                 images: prev.images.filter((img) => !imageUrls.includes(img)),
             }));
         } catch (error) {
             console.error("Error deleting images from R2:", error);
-            alert("Failed to delete images. Please try again.");
             throw error;
         }
     };
@@ -264,6 +376,8 @@ const AddNewBunny = () => {
             try {
                 await deleteImagesFromR2(bunny, setBunny);
             } catch (error) {
+                console.error("Error during cancel cleanup:", error);
+                alert("Failed to clean up images.");
                 return;
             } finally {
                 setLoading(false);
@@ -277,11 +391,15 @@ const AddNewBunny = () => {
             dob: "",
             takeHomeDate: "",
             price: "",
-            status: "",
+            status: "available",
             pedigreedParents: "",
             color: "",
             images: [],
         });
+    };
+
+    const handleback = () => {
+        navigate("/admin/manage-listing");
     };
 
     return (
@@ -292,7 +410,7 @@ const AddNewBunny = () => {
                 </div>
             )}
             <div className="flex space-x-3 items-center mb-6">
-                {id && <><span className="cursor-pointer" onClick={handleback}><CircleArrowLeft strokeWidth={2.5} size={25} /></span></>}
+                {id && <span className="cursor-pointer" onClick={handleback}><CircleArrowLeft strokeWidth={2.5} size={25} /></span>}
                 <h1 className="text-center text-[#754E1A] sm:text-left text-2xl font-semibold">
                     {id ? "Edit Bunny" : "Add New Bunny"}
                 </h1>
@@ -315,8 +433,6 @@ const AddNewBunny = () => {
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  
-
                     <div>
                         <label className="block text-[#4A3B2D]">Date of Birth</label>
                         <input
@@ -422,56 +538,49 @@ const AddNewBunny = () => {
 
                     <label className="cursor-pointer bg-[#754E1A] text-white px-4 py-2 rounded-md hover:bg-[#5f482a]">
                         Select Images
-                        <input type="file" accept="image/*" multiple className="hidden" onChange={handleAddImages} />
+                        <input type="file" accept="image/*" multiple className="hidden" onChange={handleAddImages} disabled={loading} />
                     </label>
 
-                    <div className="mt-4 grid grid-cols-1 lg:grid-cols-4 gap-2">
-                        {bunny.images.length === 0 ? (
-                            <p className="col-span-4 text-[#4A3B2D] italic">No images uploaded</p>
-                        ) : (
-                            bunny.images.map((img, index) => {
-                                const imageUrl = img instanceof File ? URL.createObjectURL(img) : img;
-
-                                return (
-                                    <div key={index} className="relative w-64 h-64 sm:w-64 sm:h-64 mt-4 rounded-lg overflow-visible border">
-                                        <img src={imageUrl} alt="Preview" className="w-full h-full object-cover" />
-
-                                        <button
-                                            onClick={async () => {
-                                                setLoading(true);
-                                                try {
-                                                    if (id) {
-                                                        await handleDeleteImage(imageUrl, index);
-                                                    } else {
-                                                        await deleteImagesFromR2(bunny, setBunny, imageUrl);
-                                                    }
-                                                } catch (error) {
-                                                    console.error("Error deleting image:", error);
-                                                    alert("Failed to delete image.");
-                                                } finally {
-                                                    setLoading(false);
-                                                }
-                                            }}
-                                            className="absolute top-0 right-0 translate-x-1/2 -translate-y-1/2 bg-[#754E1A] text-white rounded-full text-xs p-1"
-                                        >
-                                            <X className="w-4 h-4 text-white" />
-                                        </button>
+                    {bunny.images.length > 0 ? (
+                        <div className="mt-4">
+                            <p className="text-sm text-[#4A3B2D] mb-2">Drag images to reorder them</p>
+                            <DndContext
+                                sensors={sensors}
+                                collisionDetection={closestCenter}
+                                onDragEnd={handleDragEnd}
+                            >
+                                <SortableContext
+                                    items={bunny.images}
+                                    strategy={verticalListSortingStrategy}
+                                >
+                                    <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
+                                        {bunny.images.map((img, index) => (
+                                            <SortableImage
+                                                key={img}
+                                                img={img}
+                                                index={index}
+                                                onDelete={handleDeleteImage}
+                                            />
+                                        ))}
                                     </div>
-                                );
-                            })
-                        )}
-                    </div>
+                                </SortableContext>
+                            </DndContext>
+                        </div>
+                    ) : (
+                        <p className="mt-4 text-[#4A3B2D] italic">No images uploaded</p>
+                    )}
                 </div>
 
                 <div className="mt-6 flex space-x-1 justify-end">
-                    {!id && <button
-                        onClick={handleCancel}
-                        className="text-[#754E1A] cursor-pointer bg-white px-4 py-2 rounded border border-[#4A3B2D] flex items-center"
-                        disabled={loading}
-                    >
-                        Cancel
-                    </button>}
-
+                    {!id && (
+                        <button
+                            onClick={handleCancel}
+                            className="text-[#754E1A] cursor-pointer bg-white px-4 py-2 rounded border border-[#4A3B2D] flex items-center"
+                            disabled={loading}
+                        >
+                            Cancel
+                        </button>
+                    )}
                     <button
                         onClick={handleSubmit}
                         className="bg-[#754E1A] cursor-pointer text-white px-4 py-2 rounded hover:bg-[#5f482a] flex items-center"
