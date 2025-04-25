@@ -19,7 +19,6 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 
-// Sortable Image Component
 const SortableImage = ({ img, index, onDelete }) => {
     const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id: img });
 
@@ -34,7 +33,7 @@ const SortableImage = ({ img, index, onDelete }) => {
             {...attributes}
             {...listeners}
             style={style}
-            className="relative w-64 h-64 sm:w-64 sm:h-64 mt-4 rounded-lg overflow-visible border flex flex-col"
+            className="relative w-64 h-64 sm:w-72 sm:h-72 mt-4 rounded-lg overflow-hidden border flex flex-col bg-white"
         >
             <div className="flex items-center justify-between p-1 bg-gray-50 border-b">
                 <div className="cursor-grab p-1">
@@ -42,14 +41,18 @@ const SortableImage = ({ img, index, onDelete }) => {
                 </div>
                 <span className="text-xs text-gray-500">Image {index + 1}</span>
             </div>
-            <div className="flex-grow">
-                <img src={img} alt="Preview" className="w-full h-full object-cover" />
+            <div className="flex-grow overflow-hidden">
+                <img
+                    src={img}
+                    alt="Preview"
+                    className="w-full h-full object-cover"
+                />
             </div>
             <button
                 onTouchStart={(e) => e.stopPropagation()}
                 onMouseDown={(e) => e.stopPropagation()}
                 onClick={() => onDelete(img)}
-                className="absolute top-0 right-0 translate-x-1/2 -translate-y-1/2 bg-[#754E1A] text-white rounded-full text-xs p-1"
+                className="absolute top-1 right-1 bg-[#754E1A] text-white rounded-full text-xs p-1 z-10"
             >
                 <X className="w-4 h-4 text-white" />
             </button>
