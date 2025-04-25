@@ -35,7 +35,7 @@ const jsonUrls = {
     "breeds/holland_lop": "https://backend.sillybillysilkies.workers.dev/cms/breeds/holland_lop.json",
     "breeds/netherland_dwarf": "https://backend.sillybillysilkies.workers.dev/cms/breeds/netherland_dwarf.json",
     "gallery": "https://backend.sillybillysilkies.workers.dev/cms/gallery.json",
-    "profile":"https://backend.sillybillysilkies.workers.dev/GetProfilePic",
+    "profile": "https://backend.sillybillysilkies.workers.dev/GetProfilePic",
 };
 
 /**
@@ -90,15 +90,50 @@ async function processJson(key, url) {
         } else if (key.startsWith("breeds") && data.bunnies) {
             console.log(`🐰 Processing breed images: ${key}`);
             const breedFolder = key.replace("breeds/", "breeds/"); // Example: breeds/holland_lop
+
             for (let bunny of data.bunnies) {
-                if (bunny.images) {
+                // Check if we have orderedImages with order information
+                if (bunny.orderedImages && bunny.orderedImages.length > 0) {
+                    console.log(`📊 Using ordered images for bunny ${bunny.id}`);
+
+                    // Sort by order property
+                    const sortedImages = [...bunny.orderedImages].sort((a, b) => a.order - b.order);
+
+                    // Process each image in the sorted order
+                    const processedImages = await Promise.all(
+                        sortedImages.map(async (imageObj, index) => {
+                            const ext = path.extname(imageObj.url);
+                            // Include order in filename to maintain order in static files
+                            const filename = `${bunny.id}-${index + 1}-order${imageObj.order}${ext}`;
+                            return await downloadImage(imageObj.url, breedFolder, filename);
+                        })
+                    );
+
+                    // Update both the images array and orderedImages in the bunny
+                    bunny.images = processedImages;
+
+                    // Update orderedImages with new local paths
+                    bunny.orderedImages = sortedImages.map((imageObj, index) => ({
+                        url: processedImages[index],
+                        order: imageObj.order
+                    }));
+                }
+                // Fallback for bunnies without orderedImages
+                else if (bunny.images) {
+                    console.log(`⚠️ No order information for bunny ${bunny.id}, using default order`);
                     bunny.images = await Promise.all(
                         bunny.images.map(async (imageUrl, index) => {
                             const ext = path.extname(imageUrl);
-                            const filename = `${bunny.id}-${index}${ext}`;
+                            const filename = `${bunny.id}-${index + 1}${ext}`;
                             return await downloadImage(imageUrl, breedFolder, filename);
                         })
                     );
+
+                    // Create orderedImages based on array index
+                    bunny.orderedImages = bunny.images.map((url, index) => ({
+                        url,
+                        order: index + 1
+                    }));
                 }
             }
         } else if (key === "gallery" && data.pets) {
@@ -125,7 +160,6 @@ async function processJson(key, url) {
             // ✅ Update the JSON structure
             data.imageUrl = relativePath;  // Replace external URL with local path
         }
-
 
         // Ensure nested directory structure for breeds
         const jsonFilePath = path.join(DATA_DIR, `${key}.json`);

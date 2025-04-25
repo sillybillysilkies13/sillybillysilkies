@@ -4,8 +4,9 @@ import { CircleArrowLeft, GripVertical, X } from "lucide-react";
 import {
     DndContext,
     closestCenter,
+    MouseSensor,
+    TouchSensor,
     KeyboardSensor,
-    PointerSensor,
     useSensor,
     useSensors
 } from "@dnd-kit/core";
@@ -30,11 +31,13 @@ const SortableImage = ({ img, index, onDelete }) => {
     return (
         <div
             ref={setNodeRef}
+            {...attributes}
+            {...listeners}
             style={style}
             className="relative w-64 h-64 sm:w-64 sm:h-64 mt-4 rounded-lg overflow-visible border flex flex-col"
         >
             <div className="flex items-center justify-between p-1 bg-gray-50 border-b">
-                <div {...attributes} {...listeners} className="cursor-grab p-1">
+                <div className="cursor-grab p-1">
                     <GripVertical className="w-4 h-4 text-gray-500" />
                 </div>
                 <span className="text-xs text-gray-500">Image {index + 1}</span>
@@ -43,6 +46,8 @@ const SortableImage = ({ img, index, onDelete }) => {
                 <img src={img} alt="Preview" className="w-full h-full object-cover" />
             </div>
             <button
+                onTouchStart={(e) => e.stopPropagation()}
+                onMouseDown={(e) => e.stopPropagation()}
                 onClick={() => onDelete(img)}
                 className="absolute top-0 right-0 translate-x-1/2 -translate-y-1/2 bg-[#754E1A] text-white rounded-full text-xs p-1"
             >
@@ -70,12 +75,25 @@ const AddNewBunny = () => {
         color: "",
         images: [],
     });
+    const [orderedImages, setOrderedImages] = useState([]);
+    const [orderChanged, setOrderChanged] = useState(false);
     const [isSubmitted, setIsSubmitted] = useState(false);
     const isMounted = useRef(true);
 
-    // Setup dnd-kit sensors
+    // Setup dnd-kit sensors - adjusted to match HomePageCarousel
     const sensors = useSensors(
-        useSensor(PointerSensor),
+        useSensor(MouseSensor, {
+            activationConstraint: {
+                distance: 10, // Require 10px movement before drag starts
+            },
+        }),
+        useSensor(TouchSensor, {
+            activationConstraint: {
+                delay: 150,
+                tolerance: 5,
+                distance: 10, // Require 10px movement for touch drag
+            },
+        }),
         useSensor(KeyboardSensor, {
             coordinateGetter: sortableKeyboardCoordinates
         })
@@ -118,7 +136,7 @@ const AddNewBunny = () => {
             document.removeEventListener("click", handleNavigation, true);
             isMounted.current = false;
         };
-    }, []); // Empty dependency array to run only on mount/unmount
+    }, []);
 
     // Cleanup effect separated with no dependencies
     useEffect(() => {
@@ -130,11 +148,21 @@ const AddNewBunny = () => {
                 });
             }
         };
-    }, []); // Empty dependency array ensures cleanup only on unmount
+    }, []);
 
     useEffect(() => {
         if (id && location.state?.bunny) {
-            setBunny(location.state.bunny);
+            const loadedBunny = location.state.bunny;
+            setBunny(loadedBunny);
+
+            // Generate ordered images when loading an existing bunny
+            if (loadedBunny.images && loadedBunny.images.length > 0) {
+                const newOrderedImages = loadedBunny.images.map((img, index) => ({
+                    url: img,
+                    order: index + 1
+                }));
+                setOrderedImages(newOrderedImages);
+            }
         }
     }, [id, location.state]);
 
@@ -171,10 +199,19 @@ const AddNewBunny = () => {
             const uploadedUrls = data.uploadedUrls || [];
             console.log("Uploaded URLs:", uploadedUrls);
 
+            // Add new images to bunny state
+            const newImages = [...bunny.images, ...uploadedUrls];
             setBunny((prev) => ({
                 ...prev,
-                images: [...prev.images, ...uploadedUrls],
+                images: newImages,
             }));
+
+            // Update ordered images with order numbers
+            const newOrderedImages = newImages.map((url, index) => ({
+                url: url,
+                order: index + 1
+            }));
+            setOrderedImages(newOrderedImages);
         } catch (error) {
             console.error("Error uploading images:", error);
             alert("Failed to upload images. Please try again.");
@@ -183,20 +220,34 @@ const AddNewBunny = () => {
         }
     };
 
-    // Handle drag end for sorting images
+    // Handle drag end for sorting images - updated to match HomePageCarousel style
     const handleDragEnd = (event) => {
         const { active, over } = event;
 
         if (active.id !== over.id) {
-            setBunny((prev) => {
-                const oldIndex = prev.images.indexOf(active.id);
-                const newIndex = prev.images.indexOf(over.id);
+            const oldIndex = bunny.images.indexOf(active.id);
+            const newIndex = bunny.images.indexOf(over.id);
 
-                return {
-                    ...prev,
-                    images: arrayMove(prev.images, oldIndex, newIndex),
-                };
-            });
+            // Reorder images array
+            const reorderedImages = arrayMove(bunny.images, oldIndex, newIndex);
+
+            // Check if order actually changed
+            const hasOrderChanged = JSON.stringify(reorderedImages) !== JSON.stringify(bunny.images);
+
+            // Update bunny state with new image order
+            setBunny((prev) => ({
+                ...prev,
+                images: reorderedImages,
+            }));
+
+            // Update ordered images array with new order numbers
+            const newOrderedImages = reorderedImages.map((url, index) => ({
+                url: url,
+                order: index + 1
+            }));
+
+            setOrderedImages(newOrderedImages);
+            setOrderChanged(hasOrderChanged);
         }
     };
 
@@ -208,6 +259,16 @@ const AddNewBunny = () => {
         setLoading(true);
 
         try {
+            // Create ordered images array from current images
+            const imagesList = bunny.images.map((url, index) => ({
+                url: url,
+                order: index + 1
+            }));
+
+            // Store the images in the correct order
+            // This ensures the bunny.images array is sorted by order
+            const sortedImages = [...imagesList].sort((a, b) => a.order - b.order).map(img => img.url);
+
             if (id) {
                 const updatedData = {
                     id: id,
@@ -221,7 +282,8 @@ const AddNewBunny = () => {
                     status: bunny.status,
                     pedigreedParents: bunny.pedigreedParents,
                     color: bunny.color,
-                    images: bunny.images,
+                    images: sortedImages, // Use sorted images
+                    orderedImages: imagesList // Keep order metadata
                 };
 
                 const response = await fetch("https://backend.sillybillysilkies.workers.dev/update", {
@@ -233,7 +295,7 @@ const AddNewBunny = () => {
                 if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
 
                 // Update the image order in KV
-                await updateImagesOrder(bunny.images, id, `breeds/${bunny.breed.toLowerCase().replace(/\s+/g, "_")}`);
+                await updateImagesOrder(sortedImages, id, `breeds/${bunny.breed.toLowerCase().replace(/\s+/g, "_")}`);
 
                 alert("Bunny updated successfully!");
             } else {
@@ -247,7 +309,8 @@ const AddNewBunny = () => {
                     status: bunny.status,
                     pedigreedParents: bunny.pedigreedParents,
                     color: bunny.color,
-                    images: bunny.images,
+                    images: sortedImages, // Use sorted images
+                    orderedImages: imagesList // Keep order metadata
                 });
 
                 const formData = new FormData();
@@ -270,7 +333,7 @@ const AddNewBunny = () => {
                 const responseData = await response.json();
 
                 // Update the image order in KV with the new bunny ID
-                await updateImagesOrder(bunny.images, responseData.id, `breeds/${bunny.breed.toLowerCase().replace(/\s+/g, "_")}`);
+                await updateImagesOrder(sortedImages, responseData.id, `breeds/${bunny.breed.toLowerCase().replace(/\s+/g, "_")}`);
 
                 alert("Bunny added successfully!");
             }
@@ -285,11 +348,14 @@ const AddNewBunny = () => {
         }
     };
 
-    // Function to update image order in KV storage
+    // Function to update image order in KV storage - updated to match HomePageCarousel
     const updateImagesOrder = async (images, bunnyId, pageType) => {
         try {
             // Create array of ordered images with indices
-            const orderedImages = images.map((url, index) => ({ url, order: index }));
+            const orderedImages = images.map((url, index) => ({
+                url,
+                order: index + 1
+            }));
 
             const response = await fetch("https://backend.sillybillysilkies.workers.dev/updateBunnyImagesOrder", {
                 method: "POST",
@@ -297,7 +363,10 @@ const AddNewBunny = () => {
                 body: JSON.stringify({
                     bunnyId,
                     pageType,
-                    orderedImages
+                    orderedImages,
+                    // Also send the ordered image array as the images array
+                    // This ensures that the images are stored in the correct order in the KV
+                    images: orderedImages.map(img => img.url)
                 }),
             });
 
@@ -306,6 +375,7 @@ const AddNewBunny = () => {
             }
 
             console.log("Image order updated successfully");
+            setOrderChanged(false);
         } catch (error) {
             console.error("Error updating image order:", error);
         }
@@ -327,10 +397,19 @@ const AddNewBunny = () => {
 
                 if (!response.ok) throw new Error("Failed to delete image");
 
+                // Update bunny state removing the deleted image
+                const updatedImages = bunny.images.filter((img) => img !== imageUrl);
                 setBunny((prev) => ({
                     ...prev,
-                    images: prev.images.filter((img) => img !== imageUrl),
+                    images: updatedImages,
                 }));
+
+                // Update ordered images
+                const newOrderedImages = updatedImages.map((url, index) => ({
+                    url: url,
+                    order: index + 1
+                }));
+                setOrderedImages(newOrderedImages);
             } else {
                 await deleteImagesFromR2(bunny, setBunny, imageUrl);
             }
@@ -360,10 +439,20 @@ const AddNewBunny = () => {
             if (!response.ok) throw new Error("Failed to delete images from R2");
 
             console.log("Images successfully deleted from R2:", imageUrls);
+
+            // Update bunny images
+            const updatedImages = bunny.images.filter((img) => !imageUrls.includes(img));
             setBunny((prev) => ({
                 ...prev,
-                images: prev.images.filter((img) => !imageUrls.includes(img)),
+                images: updatedImages,
             }));
+
+            // Update ordered images
+            const newOrderedImages = updatedImages.map((url, index) => ({
+                url: url,
+                order: index + 1
+            }));
+            setOrderedImages(newOrderedImages);
         } catch (error) {
             console.error("Error deleting images from R2:", error);
             throw error;
@@ -396,10 +485,28 @@ const AddNewBunny = () => {
             color: "",
             images: [],
         });
+        setOrderedImages([]);
     };
 
     const handleback = () => {
         navigate("/admin/manage-listing");
+    };
+
+    // Function to update image order directly when order changes
+    const handleUpdateOrder = async () => {
+        if (!orderChanged || !id) return;
+
+        setLoading(true);
+        try {
+            const pageType = `breeds/${bunny.breed.toLowerCase().replace(/\s+/g, "_")}`;
+            await updateImagesOrder(bunny.images, id, pageType);
+            alert("Image order updated successfully!");
+        } catch (error) {
+            console.error("Error updating image order:", error);
+            alert("Failed to update image order.");
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
@@ -536,10 +643,23 @@ const AddNewBunny = () => {
                     <p className="text-[#4A3B2D]">Upload Bunny Images</p>
                     <p className="text-xs text-[#4A3B2D] mb-2">PNG, JPG, GIF up to 10MB</p>
 
-                    <label className="cursor-pointer bg-[#754E1A] text-white px-4 py-2 rounded-md hover:bg-[#5f482a]">
-                        Select Images
-                        <input type="file" accept="image/*" multiple className="hidden" onChange={handleAddImages} disabled={loading} />
-                    </label>
+                    <div className="flex justify-center space-x-2">
+                        <label className="cursor-pointer bg-[#754E1A] text-white px-4 py-2 rounded-md hover:bg-[#5f482a]">
+                            Select Images
+                            <input type="file" accept="image/*" multiple className="hidden" onChange={handleAddImages} disabled={loading} />
+                        </label>
+
+                        {orderChanged && id && (
+                            <button
+                                onClick={handleUpdateOrder}
+                                disabled={loading}
+                                className={`px-4 py-2 rounded-md text-white text-sm 
+                                    ${!loading ? "bg-[#754E1A] hover:bg-[#5f482a]" : "bg-gray-400 cursor-not-allowed"}`}
+                            >
+                                Update Order
+                            </button>
+                        )}
+                    </div>
 
                     {bunny.images.length > 0 ? (
                         <div className="mt-4">
@@ -553,7 +673,7 @@ const AddNewBunny = () => {
                                     items={bunny.images}
                                     strategy={verticalListSortingStrategy}
                                 >
-                                    <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                                         {bunny.images.map((img, index) => (
                                             <SortableImage
                                                 key={img}
