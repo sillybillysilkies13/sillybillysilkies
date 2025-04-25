@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { motion } from "framer-motion";
 import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/css";
@@ -6,6 +6,23 @@ import "swiper/css/pagination";
 import { Pagination, Autoplay } from "swiper/modules";
 
 const BunnyCard = ({ data, index }) => {
+    // Sort images by order property if available, otherwise use as-is
+    const sortedImages = useMemo(() => {
+        // Check if images are objects with url and order properties
+        if (data.images && data.images.length > 0 && typeof data.images[0] === 'object' && data.images[0].url) {
+            // Sort by order property
+            return [...data.images].sort((a, b) => a.order - b.order).map(img => img.url);
+        }
+        // Use images as-is if they're just strings
+        return data.images || [];
+    }, [data.images]);
+
+    // Get the main image (first in sorted order)
+    const mainImage = sortedImages.length > 0 ? sortedImages[0] : "";
+
+    // Get additional images (all except the first)
+    const additionalImages = sortedImages.slice(1);
+
     return (
         <div className="sm:max-w-5xl sm:mx-auto sm:py-6 sm:px-12">
             {/* Ensure flex-row and alternate layout for odd and even indexes */}
@@ -25,7 +42,7 @@ const BunnyCard = ({ data, index }) => {
                             modules={[Pagination, Autoplay]}
                             className="w-full relative"
                         >
-                            {data.images.map((img, imgIndex) => (
+                            {sortedImages.map((img, imgIndex) => (
                                 <SwiperSlide key={imgIndex}>
                                     <motion.div className="relative w-full flex justify-center">
                                         {/* Sold Badge */}
@@ -65,7 +82,7 @@ const BunnyCard = ({ data, index }) => {
                             </motion.div>
                         )}
                         <motion.img
-                            src={data.images[0]}
+                            src={mainImage}
                             alt="Bunny"
                             className="w-full aspect-square rounded-3xl object-cover"
                         />
@@ -85,9 +102,9 @@ const BunnyCard = ({ data, index }) => {
                 </div>
             </div>
 
-            {/* Desktop: Standard Layout */}
+            {/* Desktop: Additional Images */}
             <div className="hidden sm:grid grid-cols-3 mt-16 gap-16">
-                {data.images.slice(1).map((img, imgIndex) => (
+                {additionalImages.map((img, imgIndex) => (
                     <motion.div
                         key={imgIndex}
                         className="relative aspect-square h-full"
@@ -102,7 +119,6 @@ const BunnyCard = ({ data, index }) => {
                                 whileHover={{ scale: 1.1 }}
                                 transition={{ duration: 0.3 }}
                             >
-
                                 <img src="/Images/sold_button.svg" className="h-9" alt="" />
                             </motion.div>
                         )}
@@ -115,7 +131,6 @@ const BunnyCard = ({ data, index }) => {
                     </motion.div>
                 ))}
             </div>
-
 
             <div className="flex justify-center my-5 sm:my-0 sm:mt-16 sm:mb-4">
                 <hr className="border-t-2 border-yellow-500 w-4/5" />

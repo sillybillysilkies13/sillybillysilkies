@@ -87,14 +87,14 @@ async function processJson(key, url) {
                     return { ...image, url: relativePath };
                 })
             );
-        } else if (key.startsWith("breeds") && data.bunnies) {
-            console.log(`🐰 Processing breed images: ${key}`);
-            const breedFolder = key.replace("breeds/", "breeds/"); // Example: breeds/holland_lop
+        } else if ((key === "breeds/holland_lop" || key === "breeds/netherland_dwarf") && data.bunnies) {
+            console.log(`🐰 Processing breed images with embedded order: ${key}`);
+            const breedFolder = key; // Example: breeds/holland_lop
 
             for (let bunny of data.bunnies) {
-                // Check if we have orderedImages with order information
+                // Process bunny images
                 if (bunny.orderedImages && bunny.orderedImages.length > 0) {
-                    console.log(`📊 Using ordered images for bunny ${bunny.id}`);
+                    console.log(`📊 Using orderedImages for bunny ${bunny.id}`);
 
                     // Sort by order property
                     const sortedImages = [...bunny.orderedImages].sort((a, b) => a.order - b.order);
@@ -103,24 +103,114 @@ async function processJson(key, url) {
                     const processedImages = await Promise.all(
                         sortedImages.map(async (imageObj, index) => {
                             const ext = path.extname(imageObj.url);
-                            // Include order in filename to maintain order in static files
-                            const filename = `${bunny.id}-${index + 1}-order${imageObj.order}${ext}`;
-                            return await downloadImage(imageObj.url, breedFolder, filename);
+                            // Format the filename to include order
+                            const order = imageObj.order;
+                            const filename = `${bunny.id}-${order}${ext}`;
+                            const relativePath = await downloadImage(imageObj.url, breedFolder, filename);
+
+                            // Return an object with both url and order directly in the images array
+                            return {
+                                url: relativePath,
+                                order: order
+                            };
                         })
                     );
 
-                    // Update both the images array and orderedImages in the bunny
+                    // Replace the images array with the processed images
+                    // Each entry now contains both url and order
                     bunny.images = processedImages;
 
-                    // Update orderedImages with new local paths
-                    bunny.orderedImages = sortedImages.map((imageObj, index) => ({
-                        url: processedImages[index],
-                        order: imageObj.order
-                    }));
+                    // Remove orderedImages and orderedImageUrls as they're no longer needed
+                    delete bunny.orderedImages;
+                    delete bunny.orderedImageUrls;
                 }
-                // Fallback for bunnies without orderedImages
-                else if (bunny.images) {
-                    console.log(`⚠️ No order information for bunny ${bunny.id}, using default order`);
+                // Check if we have orderedImageUrls
+                else if (bunny.orderedImageUrls && bunny.orderedImageUrls.length > 0) {
+                    console.log(`📊 Using orderedImageUrls for bunny ${bunny.id}`);
+
+                    // Sort by order property
+                    const sortedImages = [...bunny.orderedImageUrls].sort((a, b) => a.order - b.order);
+
+                    // Process each image in the sorted order
+                    const processedImages = await Promise.all(
+                        sortedImages.map(async (imageObj, index) => {
+                            const ext = path.extname(imageObj.url);
+                            // Format the filename to include order
+                            const order = imageObj.order;
+                            const filename = `${bunny.id}-${order}${ext}`;
+                            const relativePath = await downloadImage(imageObj.url, breedFolder, filename);
+
+                            // Return an object with both url and order directly in the images array
+                            return {
+                                url: relativePath,
+                                order: order
+                            };
+                        })
+                    );
+
+                    // Replace the images array with the processed images
+                    bunny.images = processedImages;
+
+                    // Remove orderedImageUrls as it's no longer needed
+                    delete bunny.orderedImageUrls;
+                }
+                // Handle legacy data format (just image URLs in array)
+                else if (Array.isArray(bunny.images) && typeof bunny.images[0] === 'string') {
+                    console.log(`⚠️ Using legacy format for bunny ${bunny.id}, adding order information`);
+
+                    // Process each image and add order based on array index
+                    const processedImages = await Promise.all(
+                        bunny.images.map(async (imageUrl, index) => {
+                            const ext = path.extname(imageUrl);
+                            const order = index + 1;
+                            const filename = `${bunny.id}-${order}${ext}`;
+                            const relativePath = await downloadImage(imageUrl, breedFolder, filename);
+
+                            // Return an object with both url and order
+                            return {
+                                url: relativePath,
+                                order: order
+                            };
+                        })
+                    );
+
+                    // Replace the images array with the processed images
+                    bunny.images = processedImages;
+                }
+                // Handle already processed format (objects with url and order)
+                else if (Array.isArray(bunny.images) && typeof bunny.images[0] === 'object' && bunny.images[0].url) {
+                    console.log(`📈 Updating already formatted images for bunny ${bunny.id}`);
+
+                    // Sort by order property
+                    const sortedImages = [...bunny.images].sort((a, b) => a.order - b.order);
+
+                    // Process each image in the sorted order
+                    const processedImages = await Promise.all(
+                        sortedImages.map(async (imageObj) => {
+                            const ext = path.extname(imageObj.url);
+                            const order = imageObj.order;
+                            const filename = `${bunny.id}-${order}${ext}`;
+                            const relativePath = await downloadImage(imageObj.url, breedFolder, filename);
+
+                            // Return an object with both url and order
+                            return {
+                                url: relativePath,
+                                order: order
+                            };
+                        })
+                    );
+
+                    // Replace the images array with the processed images
+                    bunny.images = processedImages;
+                }
+            }
+        } else if (key.startsWith("breeds/") && data.bunnies) {
+            // Regular processing for other breeds (if any)
+            console.log(`🐰 Processing breed images: ${key}`);
+            const breedFolder = key;
+
+            for (let bunny of data.bunnies) {
+                if (bunny.images) {
                     bunny.images = await Promise.all(
                         bunny.images.map(async (imageUrl, index) => {
                             const ext = path.extname(imageUrl);
@@ -128,12 +218,6 @@ async function processJson(key, url) {
                             return await downloadImage(imageUrl, breedFolder, filename);
                         })
                     );
-
-                    // Create orderedImages based on array index
-                    bunny.orderedImages = bunny.images.map((url, index) => ({
-                        url,
-                        order: index + 1
-                    }));
                 }
             }
         } else if (key === "gallery" && data.pets) {
