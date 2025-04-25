@@ -40,8 +40,8 @@ function AdminNavbar() {
             alert("Deployment started! The site will be updated shortly.");
 
             // Remove admin flag and redirect
-            localStorage.removeItem("isAdmin");
-            navigate("/");
+            // localStorage.removeItem("isAdmin");
+            // navigate("/");
         } catch (error) {
             console.error("❌ Failed to trigger redeploy:", error.message);
             alert("Failed to update site. Please try again.");
@@ -141,7 +141,7 @@ function AdminNavbar() {
                 {/* Save & Exit Button */}
                 <div className="flex space-x-2">
                     <button onClick={handleSaveAndExit} className="hidden md:block border text-[#754E1A] cursor-pointer bg-white px-4 py-2 text-sm rounded">
-                        Save & Exit
+                        Update Website
                     </button>
                     <button onClick={handleLogout} className="hidden md:block bg-[#754E1A] cursor-pointer hover:bg-[#5f482a] text-white px-4 py-2 text-sm rounded">
                         Logout
