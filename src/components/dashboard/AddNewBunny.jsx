@@ -579,29 +579,39 @@ const AddNewBunny = () => {
                         />
                     </div>
 
+                    {/*
+                      Status field removed from UI as per requirements.
+                      Backend and data remain compatible: if status is missing, treat as 'available'.
+                    */}
                     <div>
-                        <label className="block text-[#4A3B2D]">Status</label>
+                        <label className="block text-[#4A3B2D]">Pedigreed Parents</label>
                         <select
-                            name="status"
-                            value={bunny.status}
+                            name="pedigreedParents"
+                            value={bunny.pedigreedParents || "Pedigreed Parents"}
                             className="w-full border border-[#4A3B2D] p-2 rounded"
                             onChange={handleChange}
                         >
-                            <option value="">Select Status</option>
-                            <option value="available">Available</option>
-                            <option value="sold">Sold</option>
+                            {/* Dropdown options as required. Old free-text values are preserved for edit mode. */}
+                            {/* If editing and value is not in the list, show it as a disabled option for backward compatibility. */}
+                            {(
+                                [
+                                    "Pedigreed Parents",
+                                    "Pedigreed Sire",
+                                    "Pedigreed Dam",
+                                    "Not Pedigreed"
+                                ].includes(bunny.pedigreedParents)
+                                    ? null
+                                    : (
+                                        <option value={bunny.pedigreedParents} disabled>
+                                            {bunny.pedigreedParents}
+                                        </option>
+                                    )
+                            )}
+                            <option value="Pedigreed Parents">Pedigreed Parents</option>
+                            <option value="Pedigreed Sire">Pedigreed Sire</option>
+                            <option value="Pedigreed Dam">Pedigreed Dam</option>
+                            <option value="Not Pedigreed">Not Pedigreed</option>
                         </select>
-                    </div>
-                    <div>
-                        <label className="block text-[#4A3B2D]">Pedigreed Parents</label>
-                        <input
-                            type="text"
-                            name="pedigreedParents"
-                            value={bunny.pedigreedParents}
-                            placeholder="Enter pedigreed parents info"
-                            className="w-full border placeholder:text-[#4A3B2D] border-[#4A3B2D] p-2 rounded"
-                            onChange={handleChange}
-                        />
                     </div>
 
                     <div>

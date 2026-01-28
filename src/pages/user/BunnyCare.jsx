@@ -60,10 +60,11 @@ function BunnyCare() {
                     </div>
 
                 </div>
+
             </div>
 
-
-            <div className="max-w-5xl py-8  mx-auto flex flex-col lg:flex-row items-center lg:items-stretch space-y-6 lg:space-y-0 lg:space-x-10 px-4 lg:px-6 lg:py-16">
+            {/* Bunny Shopping List Section */}
+            <div className="max-w-5xl py-8  mx-auto flex flex-col lg:flex-row items-center lg:items-stretch space-y-6 lg:space-y-0 lg:space-x-10 px-4 lg:px-6 lg:py-12">
                 {/* Image Section */}
                 <div className="w-full flex items-center bg-white lg:w-1/2">
                     <img
@@ -95,7 +96,48 @@ function BunnyCare() {
             </div>
 
 
-            <div className="max-w-5xl mx-auto lg:items-stretch flex flex-col lg:flex-row items-center space-y-6 lg:space-y-0 lg:space-x-10 px-4 lg:p-6">
+            {/* New Section: When You Bring Your Bunny Home */}
+            <div className="max-w-5xl py-8 mx-auto flex flex-col lg:flex-row items-center lg:items-stretch space-y-6 lg:space-y-0 lg:space-x-10 px-4 lg:px-6 lg:py-12">
+                {/* Left: Text Content */}
+                <div className="w-full lg:w-1/2 flex flex-col justify-center">
+                    <h2 className="font-[Inter] tracking-widest lg:tracking-[7px] text-lg lg:text-xl font-extrabold text-[#404040] uppercase mb-4">
+                        When You Bring Your Bunny Home
+                    </h2>
+                    <p className="font-[Open_sans] text-base text-[#404040] mb-4">
+                        When you bring your new bunny home, realise how nervous they will be.
+                        To help them acclimate to your home's environment here are few thing you should do:
+                    </p>
+                    <ul className="font-[Open_sans] text-base list-disc pl-5 text-[#404040] space-y-1">
+                        <li>After picking up your new bunny, it's best to bring them straight home to an already equipped habitat in a calm, separate room, with a hiding spot (like a cardboard box or tunnel), ample hay, fresh water (bowl is better than bottle), and a litter box.</li>
+                        <li>DO NOT attempt to pick up or play with the bunny right away. Leave the bunny in the enclosure for 12-24 hours avoiding loud noises or sudden movements. Reach in only to replenish water & food. Let the bunny explore their new home at their own pace.</li>
+                        <li>Ensure they start eating and pooping within the first 6-12 hours.</li>
+                        <li>They are prey animals in the wild and will see you as a predator until they learn to trust you.</li>
+                        <li>Sit on the floor nearby, talk softly, and offer small treats to build positive associations. Allow the rabbit to approach you; if they hide, they're not ready for more interaction. Gently offer your hand for sniffing, pet their head/cheeks (avoiding backs/whiskers), and lie down to let them come to you.</li>
+                    </ul>
+                </div>
+                {/* Right: Image */}
+                <div className="w-full flex items-center bg-white lg:w-1/2 justify-center">
+                    <img
+                        src="/Images/BunnyCare/bunny-home.jpg"
+                        alt="Bunny home setup"
+                        className="w-full"
+                    />
+                </div>
+            </div>
+
+
+
+
+            <div className="max-w-5xl mx-auto lg:items-stretch flex flex-col lg:flex-row items-center space-y-6 lg:space-y-0 lg:space-x-10 px-4 lg:px-6 lg:py-12">
+
+                {/* Image Section */}
+                <div className="w-full lg:w-3/6">
+                    <img
+                        src="/Images/BunnyCare/bunnyDiet.png"
+                        alt="Bunny Diet Chart"
+                        className="w-full h-full rounded-lg shadow-md"
+                    />
+                </div>
                 {/* Health Information Section */}
                 <div className="w-full lg:w-2/3">
                     <h2 className="font-[Inter] tracking-widest text-center lg:tracking-[7px] lg:text-xl text-lg  font-extrabold text-[#404040] uppercase mb-4">
@@ -113,14 +155,7 @@ function BunnyCare() {
                     </ul>
                 </div>
 
-                {/* Image Section */}
-                <div className="w-full lg:w-3/6">
-                    <img
-                        src="/Images/BunnyCare/bunnyDiet.png"
-                        alt="Bunny Diet Chart"
-                        className="w-full h-full rounded-lg shadow-md"
-                    />
-                </div>
+
             </div >
             <div className="max-w-5xl py-8 mx-auto grid grid-cols-1 lg:grid-cols-3 gap-4 justify-center space-y-6 lg:space-y-0 lg:space-x-6 px-3 lg:p-6">
                 {/* Safe Fruits */}
@@ -147,7 +182,7 @@ function BunnyCare() {
                             <li>Melons</li>
                             <li>Apricot</li>
                         </ul>
-                        <img src="/Images/BunnyCare/strictlyNo.png" alt="Strictly No" className="absolute bottom-4 right-4 rounded-full w-24 h-24" />
+                        <img src="/Images/BunnyCare/strictlyYes.png" alt="Strictly No" className="absolute bottom-4 right-4 rounded-full w-24 h-24" />
                     </div>
                 </div>
 
@@ -176,7 +211,7 @@ function BunnyCare() {
                             <li>Carrot Tops</li>
                             <li>Spinach</li>
                         </ul>
-                        <img src="/Images/BunnyCare/strictlyNo.png" alt="Strictly No" className="absolute bottom-4 right-4 rounded-full w-24 h-24" />
+                        <img src="/Images/BunnyCare/strictlyYes.png" alt="Strictly No" className="absolute bottom-4 right-4 rounded-full w-24 h-24" />
                     </div>
                 </div>
 
@@ -279,6 +314,60 @@ function BunnyCare() {
                     </ul>
                 </div>
             </div>
+            {/* New Section: HOW TO HOLD YOUR BUNNY */}
+            <div className="max-w-5xl py-8 mx-auto px-3 lg:p-6">
+                <div className="text-white">
+                    <h2 className="bg-[#A2672D] font-[Poppins] mb-5 tracking-widest text-lg lg:text-2xl text-center font-semibold rounded-tl-3xl rounded-br-3xl uppercase py-3">
+                        HOW TO HOLD YOUR BUNNY
+                    </h2>
+                </div>
+                <div className="p-3 lg:px-9 lg:py-6 rounded-b-4xl not-only:text-[#404040]">
+                    {/* Top row: single centered image */}
+                    <div className="flex justify-center mb-10">
+                        <img
+                            src="/Images/BunnyCare/how-to-hold-steps.png"
+                            alt="How to Hold Your Bunny Steps"
+                            className="w-full max-w-3xl object-cover shadow-md"
+                        />
+                    </div>
+                    {/* Bottom row: two images side by side on desktop, stacked on mobile */}
+                    <div className="flex flex-col sm:flex-row gap-6 justify-start items-start ">
+                        <div className="w-full sm:w-1/2 flex justify-center">
+                            <img
+                                src="/Images/BunnyCare/hold-bunny-1.png"
+                                alt="Holding a black bunny"
+                                className="w-full max-w-md object-cover shadow-md"
+                            />
+                        </div>
+                        <div className="w-full sm:w-1/2 flex justify-center">
+                            <img
+                                src="/Images/BunnyCare/hold-bunny-2.png"
+                                alt="Holding a white and black bunny"
+                                className="w-full max-w-md object-cover shadow-md"
+                            />
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {/* New Section: HOW TO PET A RABBIT */}
+            <div className="max-w-5xl py-8 mx-auto px-3 lg:p-6">
+                <div className="text-white">
+                    <h2 className="bg-[#A2672D] font-[Poppins] mb-5 tracking-widest text-lg lg:text-2xl text-center font-semibold rounded-tl-3xl rounded-br-3xl uppercase py-3">
+                        HOW TO PET A RABBIT
+                    </h2>
+                </div>
+                <div className="p-3 lg:px-9 lg:py-6 rounded-b-4xl not-only:text-[#404040]">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-center justify-center">
+                        <div className="w-full flex justify-center">
+                            <img src="/Images/BunnyCare/petting-guide.png" alt="Bunny Petting Guide" className="w-full object-cover" />
+                        </div>
+                        <div className="w-full flex justify-center">
+                            <img src="/Images/BunnyCare/petting-guide2.png" alt="Fun Facts About Bunnies" className="w-full object-cover" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <div className="hidden sm:block max-w-5xl mx-auto p-6">
                 <img src="/Images/BunnyCare/hay.png" alt="" />
             </div>
