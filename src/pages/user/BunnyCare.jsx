@@ -97,9 +97,9 @@ function BunnyCare() {
 
 
             {/* New Section: When You Bring Your Bunny Home */}
-            <div className="max-w-5xl py-8 mx-auto flex flex-col lg:flex-row items-center lg:items-stretch space-y-6 lg:space-y-0 lg:space-x-10 px-4 lg:px-6 lg:py-12">
+            <div className="max-w-5xl pb-8 mx-auto flex flex-col lg:flex-row items-center lg:items-stretch gap-6 lg:gap-y-0 lg:gap-x-10 px-4 lg:px-6 lg:py-12">
                 {/* Left: Text Content */}
-                <div className="w-full lg:w-1/2 flex flex-col justify-center">
+                <div className="w-full lg:w-1/2 order-last lg:order-first">
                     <h2 className="font-[Inter] tracking-widest lg:tracking-[7px] text-lg lg:text-xl font-extrabold text-[#404040] uppercase mb-4">
                         When You Bring Your Bunny Home
                     </h2>
@@ -116,11 +116,11 @@ function BunnyCare() {
                     </ul>
                 </div>
                 {/* Right: Image */}
-                <div className="w-full flex items-center bg-white lg:w-1/2 justify-center">
+                <div className="w-full items-center bg-white lg:w-1/2 order-first lg:order-last">
                     <img
                         src="/Images/BunnyCare/bunny-home.jpg"
                         alt="Bunny home setup"
-                        className="w-full"
+                        className="w-full shadow-md"
                     />
                 </div>
             </div>
