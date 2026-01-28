@@ -65,6 +65,10 @@ function BunnyCare() {
 
             {/* Bunny Shopping List Section */}
             <div className="max-w-5xl py-8  mx-auto flex flex-col lg:flex-row items-center lg:items-stretch space-y-6 lg:space-y-0 lg:space-x-10 px-4 lg:px-6 lg:py-12">
+                {/* Mobile-only heading for Bunny Shopping List */}
+                <h2 className="font-[Inter] tracking-widest  lg:tracking-[7px] text-lg lg:text-xl font-extrabold text-center text-[#404040] uppercase mb-4 block lg:hidden">
+                    Bunny Shopping List
+                </h2>
                 {/* Image Section */}
                 <div className="w-full flex items-center bg-white lg:w-1/2">
                     <img
@@ -75,7 +79,7 @@ function BunnyCare() {
                 </div>
                 {/* Shopping List Section */}
                 <div className="w-full lg:w-1/2">
-                    <h2 className="font-[Inter] tracking-widest  lg:tracking-[7px] text-lg lg:text-xl font-extrabold text-center text-[#404040] uppercase mb-4">
+                    <h2 className="font-[Inter] tracking-widest  lg:tracking-[7px] text-lg lg:text-xl font-extrabold text-center text-[#404040] uppercase mb-4 hidden lg:block">
                         Bunny Shopping List
                     </h2>
                     <ul className="font-[Open_sans] text-base list-disc pl-5 text-[#404040]">
@@ -97,10 +101,15 @@ function BunnyCare() {
 
 
             {/* New Section: When You Bring Your Bunny Home */}
-            <div className="max-w-5xl pb-8 mx-auto flex flex-col lg:flex-row items-center lg:items-stretch gap-6 lg:gap-y-0 lg:gap-x-10 px-4 lg:px-6 lg:py-12">
+            {/* Mobile-only heading for When You Bring Your Bunny Home (placed before the layout wrapper
+                so it appears above the image on mobile despite order utilities on inner columns) */}
+            <h2 className="font-[Inter] text-center tracking-widest lg:tracking-[7px] text-lg lg:text-xl font-extrabold text-[#404040] uppercase mb-4 block lg:hidden">
+                When You Bring Your Bunny Home
+            </h2>
+            <div className="max-w-5xl pb-8 mx-auto flex flex-col lg:flex-row items-center lg:items-stretch gap-6 lg:gap-y-0 lg:gap-x-10 px-4 lg:px-6 lg:py-6">
                 {/* Left: Text Content */}
                 <div className="w-full lg:w-1/2 order-last lg:order-first">
-                    <h2 className="font-[Inter] tracking-widest lg:tracking-[7px] text-lg lg:text-xl font-extrabold text-[#404040] uppercase mb-4">
+                    <h2 className="font-[Inter] tracking-widest lg:tracking-[7px] text-lg lg:text-xl font-extrabold text-[#404040] uppercase mb-4 hidden lg:block">
                         When You Bring Your Bunny Home
                     </h2>
                     <p className="font-[Open_sans] text-base text-[#404040] mb-4">
@@ -130,6 +139,11 @@ function BunnyCare() {
 
             <div className="max-w-5xl mx-auto lg:items-stretch flex flex-col lg:flex-row items-center space-y-6 lg:space-y-0 lg:space-x-10 px-4 lg:px-6 lg:py-12">
 
+                {/* Mobile-only heading for To Keep The Bunny Healthy */}
+                <h2 className="font-[Inter] tracking-widest text-center lg:tracking-[7px] lg:text-xl text-lg  font-extrabold text-[#404040] uppercase mb-4 block lg:hidden">
+                    To Keep The Bunny Healthy
+                </h2>
+
                 {/* Image Section */}
                 <div className="w-full lg:w-3/6">
                     <img
@@ -140,7 +154,7 @@ function BunnyCare() {
                 </div>
                 {/* Health Information Section */}
                 <div className="w-full lg:w-2/3">
-                    <h2 className="font-[Inter] tracking-widest text-center lg:tracking-[7px] lg:text-xl text-lg  font-extrabold text-[#404040] uppercase mb-4">
+                    <h2 className="font-[Inter] tracking-widest text-center lg:tracking-[7px] lg:text-xl text-lg  font-extrabold text-[#404040] uppercase mb-4 hidden lg:block">
                         To Keep The Bunny Healthy
                     </h2>
                     <ul className="font-[Open_sans] text-md list-disc pl-5 text-[#404040]">
