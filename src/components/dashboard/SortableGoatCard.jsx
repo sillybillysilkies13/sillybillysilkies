@@ -12,7 +12,7 @@ const SortableGoatCard = ({ goat, savingId, deletingId, toggleEdit, handleDelete
     };
 
     const otherSection = goat.section === "for_sale" ? "existing" : "for_sale";
-    const otherSectionLabel = goat.section === "for_sale" ? "Existing Goats" : "Goats for Sale";
+    const otherSectionLabel = goat.section === "for_sale" ? "Gallery Goats" : "Goats for Sale";
 
     return (
         <div
@@ -140,7 +140,7 @@ const SortableGoatCard = ({ goat, savingId, deletingId, toggleEdit, handleDelete
                 </div>
                 <div className="mb-2">
                     <span className="inline-block text-xs font-semibold px-2 py-1 rounded bg-[#E0BE9A] text-[#4A3B2D]">
-                        {goat.section === "for_sale" ? "For Sale" : "Existing Goats"}
+                        {goat.section === "for_sale" ? "For Sale" : "Gallery Goats"}
                     </span>
                 </div>
             </div>

@@ -296,7 +296,7 @@ const GoatsManagement = () => {
             <div className="flex justify-between items-start flex-wrap gap-4">
                 <div>
                     <h1 className="text-2xl font-semibold mb-4">Goats Management</h1>
-                    <p className="mb-6">Total goats: {goats.length} (For Sale: {forSaleGoats.length}, Existing: {existingGoats.length})</p>
+                    <p className="mb-6">Total goats: {goats.length} (For Sale: {forSaleGoats.length}, Gallery: {existingGoats.length})</p>
                 </div>
                 <div className="flex gap-2 flex-wrap">
                     {/* Section filter tabs */}
@@ -316,7 +316,7 @@ const GoatsManagement = () => {
                         className={`px-4 py-2 rounded-md text-sm ${sectionFilter === "existing" ? "bg-[#754E1A] text-white" : "bg-white text-[#754E1A] border border-[#754E1A]"}`}
                         onClick={() => setSectionFilter("existing")}
                     >
-                        Existing
+                        Gallery
                     </button>
                     <button
                         className={`px-4 py-2 rounded-md text-white flex items-center gap-2 text-sm
@@ -399,7 +399,7 @@ const GoatsManagement = () => {
                             onChange={(e) => handleNewGoatChange("section", e.target.value)}
                             className="w-full text-[#4A3B2D] border border-[#4A3B2D] p-2 rounded"
                         >
-                            <option value="existing">Existing Goats</option>
+                            <option value="existing">Gallery Goats</option>
                             <option value="for_sale">Goats for Sale</option>
                         </select>
                     </div>
@@ -424,7 +424,7 @@ const GoatsManagement = () => {
                     {(sectionFilter === "all" || sectionFilter === "for_sale") &&
                         renderSection(forSaleGoats, "for_sale", "Goats for Sale")}
                     {(sectionFilter === "all" || sectionFilter === "existing") &&
-                        renderSection(existingGoats, "existing", "Existing Goats")}
+                        renderSection(existingGoats, "existing", "Gallery Goats")}
                 </>
             )}
         </div>
