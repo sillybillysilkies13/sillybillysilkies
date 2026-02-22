@@ -129,6 +129,7 @@ function AdminNavbar() {
                     <Link to="/admin/manage-listing" className={`hover:text-[#4A3B2D] border-b-2  border-[#754E1A] ${isActive("/admin/manage-listing")} pb-1`}>Manage Listing</Link>
                     <Link to="/admin/gallery" className={`hover:text-[#4A3B2D] border-b-2  border-[#754E1A] ${isActive("/admin/gallery")} pb-1`}>Gallery Management</Link>
                     <Link to="/admin/carousel" className={`hover:text-[#4A3B2D] border-b-2  border-[#754E1A] ${isActive("/admin/carousel")} pb-1`}>Carousel Management</Link>
+                    <Link to="/admin/goats" className={`hover:text-[#4A3B2D] border-b-2  border-[#754E1A] ${isActive("/admin/goats")} pb-1`}>Goats</Link>
                     <Link to="/admin/forms" className={`hover:text-[#4A3B2D] border-b-2  border-[#754E1A] ${isActive("/admin/forms")} pb-1`}>Form Responses</Link>
                 </div>
 
@@ -175,6 +176,7 @@ function AdminNavbar() {
                             <Link to="/admin/manage-listing" className="block py-2" onClick={() => setIsOpen(false)}>Manage Listing</Link>
                             <Link to="/admin/gallery" className="block py-2" onClick={() => setIsOpen(false)}>Gallery Management</Link>
                             <Link to="/admin/carousel" className="block py-2" onClick={() => setIsOpen(false)}>Carousel Management</Link>
+                            <Link to="/admin/goats" className="block py-2" onClick={() => setIsOpen(false)}>Goats</Link>
                             <Link to="/admin/forms" className="block py-2" onClick={() => setIsOpen(false)}>Form Responses</Link>
                         </div>
 

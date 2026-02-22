@@ -1,0 +1,70 @@
+{
+  "goats": [
+    {
+      "id": "6849635a-3d5b-4228-9a6e-dada548fd1f4",
+      "image": "/static-images/goats/6849635a-3d5b-4228-9a6e-dada548fd1f4.png",
+      "line1": "Nigerian Dwarf Buck",
+      "line2": "Butts in to help!",
+      "line3": "Friendly playful guy",
+      "section": "existing",
+      "order": 2,
+      "created_at": "2026-02-22T06:04:10.370Z",
+      "updated_at": "2026-02-22T06:04:10.370Z"
+    },
+    {
+      "id": "3798b1ce-9bdf-4d5d-8da3-de953a0535cb",
+      "image": "/static-images/goats/3798b1ce-9bdf-4d5d-8da3-de953a0535cb.png",
+      "line1": " Miniature Silky Fainting Buck",
+      "line2": "Purebred",
+      "line3": "Tri-Color",
+      "section": "existing",
+      "order": 1,
+      "created_at": "2026-02-22T06:05:39.872Z",
+      "updated_at": "2026-02-22T06:05:39.872Z"
+    },
+    {
+      "id": "73aec2c5-93b2-4804-bfae-f35acdd38a06",
+      "image": "/static-images/goats/73aec2c5-93b2-4804-bfae-f35acdd38a06.png",
+      "line1": "​Miniature Silky Fainting Doe",
+      "line2": "Purebred",
+      "line3": "White and Black",
+      "section": "existing",
+      "order": 3,
+      "created_at": "2026-02-22T06:06:00.520Z",
+      "updated_at": "2026-02-22T06:06:00.520Z"
+    },
+    {
+      "id": "652f49ec-2bed-41c9-a1e7-927eb2407dc5",
+      "image": "/static-images/goats/652f49ec-2bed-41c9-a1e7-927eb2407dc5.png",
+      "line1": "Nigerian Dwarf Doe",
+      "line2": "Purebred",
+      "line3": "Orange and White",
+      "section": "for_sale",
+      "order": 3,
+      "created_at": "2026-02-22T06:17:09.172Z",
+      "updated_at": "2026-02-22T06:17:09.172Z"
+    },
+    {
+      "id": "29afbe95-861b-41f2-9e56-719ac2bc62a7",
+      "image": "/static-images/goats/29afbe95-861b-41f2-9e56-719ac2bc62a7.png",
+      "line1": "Miniature Silky Fainting Doe",
+      "line2": "MSGA Registered",
+      "line3": "Gorgeous Blue",
+      "section": "for_sale",
+      "order": 2,
+      "created_at": "2026-02-22T06:17:47.626Z",
+      "updated_at": "2026-02-22T06:17:47.626Z"
+    },
+    {
+      "id": "bb7ee294-f347-4903-9c4c-a0151b871a6e",
+      "image": "/static-images/goats/bb7ee294-f347-4903-9c4c-a0151b871a6e.png",
+      "line1": "​Nigerial Dwarf Doeling",
+      "line2": "Purebred",
+      "line3": "Orange",
+      "section": "for_sale",
+      "order": 1,
+      "created_at": "2026-02-22T06:18:20.931Z",
+      "updated_at": "2026-02-22T06:25:18.867Z"
+    }
+  ]
+}

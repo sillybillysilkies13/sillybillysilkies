@@ -1,37 +1,27 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import GoatCard from "../../components/GoatCard";
 
 function Goats() {
-    const data = [
-        {
-            image: "/Images/Goats/1.png", // Replace with actual image URL
-            breed: "Nigerian Dwarf Buck",
-            description: "Butts in to help!\nFriendly playful guy",
-        },
-        {
-            image: "/Images/Goats/2.png", // Replace with actual image URL
-            breed: "​ Miniature Silky Fainting Buck",
-            description: "Purebred\nTri-Color",
-        }, {
-            image: "/Images/Goats/3.png", // Replace with actual image URL
-            breed: "​Miniature Silky Fainting Doe",
-            description: "Purebred\nWhite and Black",
-        },
-        {
-            image: "/Images/Goats/4.png", // Replace with actual image URL
-            breed: "Nigerian Dwarf Doe",
-            description: "Purebred\nOrange and White",
-        }, {
-            image: "/Images/Goats/5.png", // Replace with actual image URL
-            breed: "​Nigerial Dwarf Doeling",
-            description: "Purebred\nOrange",
-        },
-        {
-            image: "/Images/Goats/6.png", // Replace with actual image URL
-            breed: "Miniature Silky Fainting Doe",
-            description: "MSGA Registered\nGorgeous Blue",
-        },
-    ]
+    const [goats, setGoats] = useState([]);
+
+    useEffect(() => {
+        fetch("/data/goats.json")
+            .then(res => res.json())
+            .then(data => {
+                if (data.goats && Array.isArray(data.goats)) {
+                    setGoats(data.goats);
+                }
+            })
+            .catch(err => console.error("Error fetching goats:", err));
+    }, []);
+
+    const forSaleGoats = goats
+        .filter(g => g.section === "for_sale")
+        .sort((a, b) => a.order - b.order);
+
+    const existingGoats = goats
+        .filter(g => g.section === "existing")
+        .sort((a, b) => a.order - b.order);
 
     return (
         <>
@@ -66,19 +56,41 @@ function Goats() {
                             This a condition known as Myotonia Congenita, a genetic mutation (a permanent alteration in the DNA) where muscle fibers stiffen momentarily, resulting in some goats toppling over. Older animals seem to adapt, sensing an oncoming episode by balancing themselves with outstretched legs, preventing a fall.
                         </p>
                         <p className="mt-4 lg:text-lg text-[#404040] text-left">
-                            Mini Silky Fainting goats are a breed to consider. They’re a complete package — stunning looks and the ability to connect with humans in a deep and meaningful way.
+                            Mini Silky Fainting goats are a breed to consider. They're a complete package — stunning looks and the ability to connect with humans in a deep and meaningful way.
                             They are truly a joy to be around!
                         </p>
                     </div>
                 </div>
 
-                <div className="">
-                    <div className="px-3 sm:px-6 sm:pb-6 md:max-w-6xl lg:max-w-8/12 mx-auto grid grid-col-1 space-y-4 sm:grid-cols-2">
-                        {data.map((goat, index) => (
-                            <GoatCard key={index} data={goat} />
-                        ))}
+                {forSaleGoats.length > 0 && (
+                    <div className="">
+                        <h2
+                            style={{ fontFamily: "Inter" }}
+                            className="text-2xl font-semibold tracking-[0.3rem] text-[#A2672D] text-center mb-4">
+                            GOATS FOR SALE
+                        </h2>
+                        <div className="px-3 sm:px-6 sm:pb-6 md:max-w-6xl lg:max-w-8/12 mx-auto grid grid-col-1 space-y-4 sm:grid-cols-2">
+                            {forSaleGoats.map((goat) => (
+                                <GoatCard key={goat.id} data={goat} />
+                            ))}
+                        </div>
                     </div>
-                </div>
+                )}
+
+                {existingGoats.length > 0 && (
+                    <div className="">
+                        <h2
+                            style={{ fontFamily: "Inter" }}
+                            className="text-2xl font-semibold tracking-[0.3rem] text-[#A2672D] text-center mb-4">
+                            EXISTING GOATS
+                        </h2>
+                        <div className="px-3 sm:px-6 sm:pb-6 md:max-w-6xl lg:max-w-8/12 mx-auto grid grid-col-1 space-y-4 sm:grid-cols-2">
+                            {existingGoats.map((goat) => (
+                                <GoatCard key={goat.id} data={goat} />
+                            ))}
+                        </div>
+                    </div>
+                )}
             </div>
         </>
     );

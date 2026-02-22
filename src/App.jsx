@@ -19,6 +19,7 @@ import HomePageCarousel from "./components/dashboard/HomePageCarousel";
 import AddNewBunny from "./components/dashboard/AddNewBunny";
 import Login from "./components/dashboard/Login";
 import ProtectedRoute from "./components/ProtectedRoute"; // ✅ Import ProtectedRoute
+import GoatsManagement from "./components/dashboard/GoatsManagement";
 import HollandLop from "./pages/user/HollandLop";
 import NetherlandDwarf from "./pages/user/NetherlandDwarf";
 
@@ -184,6 +185,16 @@ function App() {
             <ProtectedRoute>
               <AdminLayout>
                 <HomePageCarousel />
+              </AdminLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/goats"
+          element={
+            <ProtectedRoute>
+              <AdminLayout>
+                <GoatsManagement />
               </AdminLayout>
             </ProtectedRoute>
           }

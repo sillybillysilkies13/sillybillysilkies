@@ -17,15 +17,9 @@ const GoatCard = ({ data }) => {
             <div
                 style={{ fontFamily: "Futura LT Book" }}
                 className=" bg-[#E0BE9A] w-full sm:w-8/12 mx-auto mt-2 sm:mt-0 sm:relative sm:bottom-6 bg-opacity-75 text-[#404040] text-lg sm:text-xl font-thin p-3 shadow-md">
-                <p className="font-thin">{data.breed}</p>
-                {data.pedigreed && <p>Pedigreed</p>}
-                {data.purebred && <p>Purebred</p>}
-                <p>{data.description.split("\n").map((line, index) => (
-                    <React.Fragment key={index}>
-                        {line}
-                        <br />
-                    </React.Fragment>
-                ))}</p>
+                {data.line1 && <p className="font-thin">{data.line1}</p>}
+                {data.line2 && <p>{data.line2}</p>}
+                {data.line3 && <p>{data.line3}</p>}
             </div>
         </div>
     );

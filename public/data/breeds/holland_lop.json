@@ -1,21 +1,35 @@
 {
   "bunnies": [
     {
-      "id": "9a8efe15-fb66-4f40-a6dd-7c9364e4bbde",
+      "id": "b848bf9b-49f5-4815-a2ad-b1e097e06476",
       "breed": "Holland Lop",
       "name": "Holland Lop",
       "gender": "Male",
-      "dob": "2024-12-29",
-      "takeHomeDate": "Ready Now",
+      "dob": "2025-10-13",
+      "takeHomeDate": "NOW",
       "price": "150",
       "status": "sold",
-      "pedigreedParents": "Parents are pedigreed",
-      "color": "Blue Eyed White",
+      "pedigreedParents": "Pedigreed Parents",
+      "color": "Brown Tort",
       "images": [
-        "/static-images/breeds/holland_lop/9a8efe15-fb66-4f40-a6dd-7c9364e4bbde-0.jpg",
-        "/static-images/breeds/holland_lop/9a8efe15-fb66-4f40-a6dd-7c9364e4bbde-1.jpg",
-        "/static-images/breeds/holland_lop/9a8efe15-fb66-4f40-a6dd-7c9364e4bbde-2.jpg"
-      ]
+        {
+          "url": "/static-images/breeds/holland_lop/b848bf9b-49f5-4815-a2ad-b1e097e06476-1.jpg",
+          "order": 1
+        },
+        {
+          "url": "/static-images/breeds/holland_lop/b848bf9b-49f5-4815-a2ad-b1e097e06476-2.jpg",
+          "order": 2
+        },
+        {
+          "url": "/static-images/breeds/holland_lop/b848bf9b-49f5-4815-a2ad-b1e097e06476-3.jpg",
+          "order": 3
+        },
+        {
+          "url": "/static-images/breeds/holland_lop/b848bf9b-49f5-4815-a2ad-b1e097e06476-4.jpg",
+          "order": 4
+        }
+      ],
+      "order": 1
     }
   ]
 }

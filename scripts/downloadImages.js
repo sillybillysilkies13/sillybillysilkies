@@ -1,6 +1,8 @@
 import fs from "fs-extra";
 import path from "path";
 import axios from "axios";
+import http from "http";
+import https from "https";
 import { fileURLToPath } from "url";
 
 // Get directory path
@@ -11,6 +13,64 @@ const __dirname = path.dirname(__filename);
 const PUBLIC_DIR = path.join(__dirname, "../public");
 const STATIC_IMAGES_DIR = path.join(PUBLIC_DIR, "static-images");
 const DATA_DIR = path.join(PUBLIC_DIR, "data");
+
+// --- Network robustness configuration ---
+const MAX_RETRIES = 3;
+const RETRY_BASE_DELAY = 1500;   // 1.5s → 3s → 6s exponential backoff
+const REQUEST_TIMEOUT = 30000;   // 30 seconds per request
+const CONCURRENCY_LIMIT = 1;     // Sequential downloads to avoid Cloudflare rate limits
+const DELAY_BETWEEN_REQUESTS = 300; // 300ms pause between consecutive downloads
+
+// Browser-like User-Agent to prevent Cloudflare bot detection from resetting connections
+const HEADERS = {
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
+    "Accept": "*/*",
+};
+
+// Fresh sockets per request, forced IPv4 to avoid IPv6 resolution issues with Cloudflare
+const httpAgent = new http.Agent({ keepAlive: false, family: 4 });
+const httpsAgent = new https.Agent({ keepAlive: false, family: 4 });
+
+/**
+ * Process an array of items with limited concurrency.
+ * Preserves result order. Workers pull the next available index when idle.
+ */
+async function downloadWithConcurrency(items, mapFn, concurrency = CONCURRENCY_LIMIT) {
+    const results = new Array(items.length);
+    let nextIndex = 0;
+
+    async function worker() {
+        while (nextIndex < items.length) {
+            const i = nextIndex++;
+            // Small delay between requests to avoid overwhelming Cloudflare edge
+            if (i > 0) {
+                await new Promise((r) => setTimeout(r, DELAY_BETWEEN_REQUESTS));
+            }
+            results[i] = await mapFn(items[i], i);
+        }
+    }
+
+    await Promise.all(
+        Array.from({ length: Math.min(concurrency, items.length) }, () => worker())
+    );
+    return results;
+}
+
+/**
+ * Retryable helper for checking transient network errors.
+ */
+function isRetryableError(error) {
+    return (
+        error.code === "ECONNRESET" ||
+        error.code === "ETIMEDOUT" ||
+        error.code === "ECONNABORTED" ||
+        error.code === "EPIPE" ||
+        error.code === "EAI_AGAIN" ||
+        error.code === "ENOTFOUND" ||
+        error.code === "ECONNREFUSED" ||
+        (error.response && error.response.status >= 500)
+    );
+}
 
 // Function to clean the directories before downloading new files
 async function cleanDirectories() {
@@ -35,6 +95,7 @@ const jsonUrls = {
     "breeds/holland_lop": "https://backend.sillybillysilkies.workers.dev/cms/breeds/holland_lop.json",
     "breeds/netherland_dwarf": "https://backend.sillybillysilkies.workers.dev/cms/breeds/netherland_dwarf.json",
     "gallery": "https://backend.sillybillysilkies.workers.dev/cms/gallery.json",
+    "goats": "https://backend.sillybillysilkies.workers.dev/cms/goats.json",
     "profile": "https://backend.sillybillysilkies.workers.dev/GetProfilePic",
 };
 
@@ -42,23 +103,44 @@ const jsonUrls = {
  * Downloads an image and saves it in `public/static-images/` under the correct subdirectory
  */
 async function downloadImage(url, folder, filename) {
-    try {
-        const saveDir = path.join(STATIC_IMAGES_DIR, folder);
-        await fs.ensureDir(saveDir);
+    const saveDir = path.join(STATIC_IMAGES_DIR, folder);
+    await fs.ensureDir(saveDir);
 
-        const savePath = path.join(saveDir, filename);
-        const relativePath = `/static-images/${folder}/${filename}`; // Web-friendly path
+    const savePath = path.join(saveDir, filename);
+    const relativePath = `/static-images/${folder}/${filename}`; // Web-friendly path
 
-        console.log(`⬇️ Downloading: ${url}`);
-        const response = await axios({ url, responseType: "arraybuffer" });
+    for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+        try {
+            // Synchronize log output to avoid stdout interleaving under concurrency
+            const tag = attempt > 1 ? ` (attempt ${attempt}/${MAX_RETRIES})` : "";
+            console.log(`⬇️  Downloading${tag}: ${url}`);
 
-        await fs.writeFile(savePath, response.data);
-        console.log(`✅ Saved: ${relativePath}`);
-        return relativePath;
-    } catch (error) {
-        console.error(`❌ Failed to download ${url}:`, error.message);
-        return url; // Return original URL if download fails
+            const response = await axios({
+                url,
+                responseType: "arraybuffer",
+                timeout: REQUEST_TIMEOUT,
+                httpAgent,
+                httpsAgent,
+                headers: HEADERS,
+            });
+
+            await fs.writeFile(savePath, response.data);
+            console.log(`✅ Saved: ${relativePath}`);
+            return relativePath;
+        } catch (error) {
+            const isRetryable = isRetryableError(error);
+
+            if (isRetryable && attempt < MAX_RETRIES) {
+                const delay = RETRY_BASE_DELAY * Math.pow(2, attempt - 1);
+                console.warn(`⚠️  Attempt ${attempt} failed for ${filename}: ${error.code || error.message}. Retrying in ${delay}ms...`);
+                await new Promise((resolve) => setTimeout(resolve, delay));
+            } else {
+                console.error(`❌ Failed to download ${url} after ${attempt} attempt(s): ${error.message}`);
+                return url; // Return original URL if all retries exhausted
+            }
+        }
     }
+    return url;
 }
 
 /**
@@ -66,9 +148,30 @@ async function downloadImage(url, folder, filename) {
  */
 async function processJson(key, url) {
     try {
-        console.log(`🔄 Fetching JSON from: ${url}`);
-        const response = await axios.get(url);
-        const data = response.data;
+        // Fetch JSON with retry logic (same robustness as image downloads)
+        let data;
+        for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+            try {
+                const tag = attempt > 1 ? ` (attempt ${attempt}/${MAX_RETRIES})` : "";
+                console.log(`🔄 Fetching JSON${tag}: ${url}`);
+                const response = await axios.get(url, {
+                    timeout: REQUEST_TIMEOUT,
+                    httpAgent,
+                    httpsAgent,
+                    headers: HEADERS,
+                });
+                data = response.data;
+                break; // Success — exit retry loop
+            } catch (fetchError) {
+                if (isRetryableError(fetchError) && attempt < MAX_RETRIES) {
+                    const delay = RETRY_BASE_DELAY * Math.pow(2, attempt - 1);
+                    console.warn(`⚠️  JSON fetch attempt ${attempt} failed for ${key}: ${fetchError.code || fetchError.message}. Retrying in ${delay}ms...`);
+                    await new Promise((r) => setTimeout(r, delay));
+                } else {
+                    throw fetchError; // Non-retryable or final attempt — let outer catch handle it
+                }
+            }
+        }
 
         if (!data || typeof data !== "object") {
             console.error(`❌ Invalid JSON data from ${url}`);
@@ -78,15 +181,13 @@ async function processJson(key, url) {
         // Process images based on data type
         if (key === "homepage" && data.images) {
             console.log(`📸 Processing homepage images`);
-            data.images = await Promise.all(
-                data.images.map(async (image) => {
-                    const ext = path.extname(image.url);
-                    const filename = `${image.id}${ext}`;
-                    const relativePath = await downloadImage(image.url, "homepage", filename);
+            data.images = await downloadWithConcurrency(data.images, async (image) => {
+                const ext = path.extname(image.url);
+                const filename = `${image.id}${ext}`;
+                const relativePath = await downloadImage(image.url, "homepage", filename);
 
-                    return { ...image, url: relativePath };
-                })
-            );
+                return { ...image, url: relativePath };
+            });
         } else if ((key === "breeds/holland_lop" || key === "breeds/netherland_dwarf") && data.bunnies) {
             console.log(`🐰 Processing breed images with embedded order: ${key}`);
             const breedFolder = key; // Example: breeds/holland_lop
@@ -100,21 +201,17 @@ async function processJson(key, url) {
                     const sortedImages = [...bunny.orderedImages].sort((a, b) => a.order - b.order);
 
                     // Process each image in the sorted order
-                    const processedImages = await Promise.all(
-                        sortedImages.map(async (imageObj, index) => {
-                            const ext = path.extname(imageObj.url);
-                            // Format the filename to include order
-                            const order = imageObj.order;
-                            const filename = `${bunny.id}-${order}${ext}`;
-                            const relativePath = await downloadImage(imageObj.url, breedFolder, filename);
+                    const processedImages = await downloadWithConcurrency(sortedImages, async (imageObj, index) => {
+                        const ext = path.extname(imageObj.url);
+                        const order = imageObj.order;
+                        const filename = `${bunny.id}-${order}${ext}`;
+                        const relativePath = await downloadImage(imageObj.url, breedFolder, filename);
 
-                            // Return an object with both url and order directly in the images array
-                            return {
-                                url: relativePath,
-                                order: order
-                            };
-                        })
-                    );
+                        return {
+                            url: relativePath,
+                            order: order
+                        };
+                    });
 
                     // Replace the images array with the processed images
                     // Each entry now contains both url and order
@@ -132,21 +229,17 @@ async function processJson(key, url) {
                     const sortedImages = [...bunny.orderedImageUrls].sort((a, b) => a.order - b.order);
 
                     // Process each image in the sorted order
-                    const processedImages = await Promise.all(
-                        sortedImages.map(async (imageObj, index) => {
-                            const ext = path.extname(imageObj.url);
-                            // Format the filename to include order
-                            const order = imageObj.order;
-                            const filename = `${bunny.id}-${order}${ext}`;
-                            const relativePath = await downloadImage(imageObj.url, breedFolder, filename);
+                    const processedImages = await downloadWithConcurrency(sortedImages, async (imageObj, index) => {
+                        const ext = path.extname(imageObj.url);
+                        const order = imageObj.order;
+                        const filename = `${bunny.id}-${order}${ext}`;
+                        const relativePath = await downloadImage(imageObj.url, breedFolder, filename);
 
-                            // Return an object with both url and order directly in the images array
-                            return {
-                                url: relativePath,
-                                order: order
-                            };
-                        })
-                    );
+                        return {
+                            url: relativePath,
+                            order: order
+                        };
+                    });
 
                     // Replace the images array with the processed images
                     bunny.images = processedImages;
@@ -159,20 +252,17 @@ async function processJson(key, url) {
                     console.log(`⚠️ Using legacy format for bunny ${bunny.id}, adding order information`);
 
                     // Process each image and add order based on array index
-                    const processedImages = await Promise.all(
-                        bunny.images.map(async (imageUrl, index) => {
-                            const ext = path.extname(imageUrl);
-                            const order = index + 1;
-                            const filename = `${bunny.id}-${order}${ext}`;
-                            const relativePath = await downloadImage(imageUrl, breedFolder, filename);
+                    const processedImages = await downloadWithConcurrency(bunny.images, async (imageUrl, index) => {
+                        const ext = path.extname(imageUrl);
+                        const order = index + 1;
+                        const filename = `${bunny.id}-${order}${ext}`;
+                        const relativePath = await downloadImage(imageUrl, breedFolder, filename);
 
-                            // Return an object with both url and order
-                            return {
-                                url: relativePath,
-                                order: order
-                            };
-                        })
-                    );
+                        return {
+                            url: relativePath,
+                            order: order
+                        };
+                    });
 
                     // Replace the images array with the processed images
                     bunny.images = processedImages;
@@ -185,20 +275,17 @@ async function processJson(key, url) {
                     const sortedImages = [...bunny.images].sort((a, b) => a.order - b.order);
 
                     // Process each image in the sorted order
-                    const processedImages = await Promise.all(
-                        sortedImages.map(async (imageObj) => {
-                            const ext = path.extname(imageObj.url);
-                            const order = imageObj.order;
-                            const filename = `${bunny.id}-${order}${ext}`;
-                            const relativePath = await downloadImage(imageObj.url, breedFolder, filename);
+                    const processedImages = await downloadWithConcurrency(sortedImages, async (imageObj) => {
+                        const ext = path.extname(imageObj.url);
+                        const order = imageObj.order;
+                        const filename = `${bunny.id}-${order}${ext}`;
+                        const relativePath = await downloadImage(imageObj.url, breedFolder, filename);
 
-                            // Return an object with both url and order
-                            return {
-                                url: relativePath,
-                                order: order
-                            };
-                        })
-                    );
+                        return {
+                            url: relativePath,
+                            order: order
+                        };
+                    });
 
                     // Replace the images array with the processed images
                     bunny.images = processedImages;
@@ -211,13 +298,11 @@ async function processJson(key, url) {
 
             for (let bunny of data.bunnies) {
                 if (bunny.images) {
-                    bunny.images = await Promise.all(
-                        bunny.images.map(async (imageUrl, index) => {
-                            const ext = path.extname(imageUrl);
-                            const filename = `${bunny.id}-${index + 1}${ext}`;
-                            return await downloadImage(imageUrl, breedFolder, filename);
-                        })
-                    );
+                    bunny.images = await downloadWithConcurrency(bunny.images, async (imageUrl, index) => {
+                        const ext = path.extname(imageUrl);
+                        const filename = `${bunny.id}-${index + 1}${ext}`;
+                        return await downloadImage(imageUrl, breedFolder, filename);
+                    });
                 }
             }
         } else if (key === "gallery" && data.pets) {
@@ -228,6 +313,15 @@ async function processJson(key, url) {
                     const ext = path.extname(pet.image_url);
                     const filename = `${petId}${ext}`;
                     pet.image_url = await downloadImage(pet.image_url, "gallery", filename);
+                }
+            }
+        } else if (key === "goats" && data.goats) {
+            console.log(`🐐 Processing goat images`);
+            for (let goat of data.goats) {
+                if (goat.image) {
+                    const ext = path.extname(goat.image);
+                    const filename = `${goat.id}${ext}`;
+                    goat.image = await downloadImage(goat.image, "goats", filename);
                 }
             }
         }
@@ -263,8 +357,14 @@ async function processJson(key, url) {
 (async () => {
     await cleanDirectories(); // Clean data before fetching new content
 
-    for (const [key, url] of Object.entries(jsonUrls)) {
+    const entries = Object.entries(jsonUrls);
+    for (let i = 0; i < entries.length; i++) {
+        const [key, url] = entries[i];
         await processJson(key, url);
+        // Pause between JSON endpoints to let Cloudflare edge recover
+        if (i < entries.length - 1) {
+            await new Promise((r) => setTimeout(r, 1000));
+        }
     }
 
     console.log("🎉 Image download and JSON update complete!");
