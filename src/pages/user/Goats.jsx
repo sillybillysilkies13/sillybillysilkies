@@ -82,7 +82,7 @@ function Goats() {
                         <h2
                             style={{ fontFamily: "Inter" }}
                             className="text-2xl font-semibold tracking-[0.3rem] text-[#A2672D] text-center mb-4">
-                            Our Beloved Goats
+                            OUR BELOVED GOATS
                         </h2>
                         <div className="px-3 sm:px-6 sm:pb-6 md:max-w-6xl lg:max-w-8/12 mx-auto grid grid-cols-1 gap-4 sm:grid-cols-2">
                             {existingGoats.map((goat) => (
