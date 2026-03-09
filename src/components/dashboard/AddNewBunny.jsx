@@ -74,7 +74,7 @@ const AddNewBunny = () => {
         takeHomeDate: "",
         price: "",
         status: "available",
-        pedigreedParents: "",
+        pedigreedParents: "Pedigreed Parents",
         color: "",
         images: [],
     });
@@ -484,7 +484,7 @@ const AddNewBunny = () => {
             takeHomeDate: "",
             price: "",
             status: "available",
-            pedigreedParents: "",
+            pedigreedParents: "Pedigreed Parents",
             color: "",
             images: [],
         });
@@ -587,7 +587,7 @@ const AddNewBunny = () => {
                         <label className="block text-[#4A3B2D]">Pedigreed Parents</label>
                         <select
                             name="pedigreedParents"
-                            value={bunny.pedigreedParents || "Pedigreed Parents"}
+                            value={bunny.pedigreedParents}
                             className="w-full border border-[#4A3B2D] p-2 rounded"
                             onChange={handleChange}
                         >
