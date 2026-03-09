@@ -29,6 +29,37 @@
           "order": 4
         }
       ],
+      "order": 2
+    },
+    {
+      "id": "befffe64-9e01-4094-9e1d-830845b076e7",
+      "breed": "Holland Lop",
+      "name": "Fuzzy Holland Lop",
+      "gender": "Male",
+      "dob": "2025-12-27",
+      "takeHomeDate": "Ready Now",
+      "price": "150",
+      "status": "available",
+      "pedigreedParents": "Not Pedigreed",
+      "color": "Broken blue",
+      "images": [
+        {
+          "url": "/static-images/breeds/holland_lop/befffe64-9e01-4094-9e1d-830845b076e7-1.jpg",
+          "order": 1
+        },
+        {
+          "url": "/static-images/breeds/holland_lop/befffe64-9e01-4094-9e1d-830845b076e7-2.jpg",
+          "order": 2
+        },
+        {
+          "url": "/static-images/breeds/holland_lop/befffe64-9e01-4094-9e1d-830845b076e7-3.jpg",
+          "order": 3
+        },
+        {
+          "url": "/static-images/breeds/holland_lop/befffe64-9e01-4094-9e1d-830845b076e7-4.jpg",
+          "order": 4
+        }
+      ],
       "order": 1
     }
   ]

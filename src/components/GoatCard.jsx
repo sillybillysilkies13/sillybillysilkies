@@ -4,12 +4,14 @@ const GoatCard = ({ data }) => {
     return (
         <div className="relative w-full mx-auto sm:p-4 rounded-lg text-center flex flex-col">
             {/* Image Section */}
-            <div className="border-4 p-1 border-white rounded-lg shadow-2xl overflow-hidden relative">
-                <img
-                    src={data.image}
-                    alt="Goat"
-                    className="w-full h-auto block"
-                />
+            <div className="border-4 p-1 border-white rounded-lg shadow-2xl overflow-hidden relative bg-[#f5ede4]">
+                <div className="w-full aspect-[4/3]">
+                    <img
+                        src={data.image}
+                        alt="Goat"
+                        className="w-full h-full object-contain"
+                    />
+                </div>
             </div>
             {/* Text Box Over Image */}
             <div
