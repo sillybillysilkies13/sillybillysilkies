@@ -1,6 +1,14 @@
 import React, { useState } from "react";
 import { API_BASE } from "../../utils/backend";
 
+// Each contact message is (1) saved by the backend so it shows in the admin's
+// Form Responses page and (2) emailed by FormSubmit (formsubmit.co). The
+// FormSubmit form is registered to FORM_OWNER_EMAIL (it received the one-time
+// "Activate Form" link) and every message is also CC'd to the farm's main inbox.
+const FORM_OWNER_EMAIL = "sillybillysilkies13@gmail.com";
+const FARM_INBOX = "sillybillysilkies@gmail.com";
+const FORMSUBMIT_URL = `https://formsubmit.co/ajax/${FORM_OWNER_EMAIL}`;
+
 const ContactSection = () => {
     const [formData, setFormData] = useState({
         firstName: "",
@@ -19,24 +27,61 @@ const ContactSection = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        // The send button is not a real submit button, so run the browser's
+        // required/email checks here (all four fields are required).
+        const form = e.currentTarget?.closest?.("form");
+        if (form && !form.reportValidity()) return;
+
         setLoading(true);
         setSuccess(false);
         setError(null);
 
-        try {
+        const { firstName, lastName, email, message } = formData;
+        const name = `${firstName} ${lastName}`.trim();
+
+        const saveToFormResponses = async () => {
             const response = await fetch(`${API_BASE}/submit`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ firstName, lastName, email, message }),
+            });
+            if (!response.ok) throw new Error(`Form Responses save failed (HTTP ${response.status})`);
+        };
+
+        const emailWithFormSubmit = async () => {
+            const response = await fetch(FORMSUBMIT_URL, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
+                    Accept: "application/json",
                 },
-                body: JSON.stringify(formData),
+                body: JSON.stringify({
+                    "First Name": firstName,
+                    "Last Name": lastName,
+                    email, // FormSubmit uses this as the reply-to address
+                    Message: message,
+                    _subject: `New website message from ${name}`,
+                    _replyto: email,
+                    _cc: FARM_INBOX,
+                    _template: "table",
+                    _captcha: "false",
+                }),
             });
+            const result = await response.json().catch(() => ({}));
+            if (!response.ok || String(result.success) !== "true") {
+                throw new Error(`FormSubmit email failed: ${result.message || `HTTP ${response.status}`}`);
+            }
+        };
 
-            if (!response.ok) {
-                throw new Error("Failed to send message. Please try again.");
+        try {
+            // Both run at once. The message counts as received if either worked
+            // (saved for the admin page, or emailed); failures are logged.
+            const results = await Promise.allSettled([saveToFormResponses(), emailWithFormSubmit()]);
+            results.filter((r) => r.status === "rejected").forEach((r) => console.error(r.reason));
+            if (results.every((r) => r.status === "rejected")) {
+                throw new Error(`Sorry, your message could not be sent. Please email us at ${FARM_INBOX}.`);
             }
 
-            // The backend saves the message and emails a copy to the farm's inbox.
             setSuccess(true);
             setFormData({ firstName: "", lastName: "", email: "", message: "" });
         } catch (err) {
@@ -66,7 +111,7 @@ const ContactSection = () => {
             <div className="grid grid-cols-1 lg:grid-cols-4 min-h-full">
                 {/* Left Section - Contact Info */}
                 <div className="bg-[#E0BE9A]/80 text-[#4A3628] px-4 sm:pl-16 py-8 flex flex-col justify-center">
-                    <div className="relative bottom-16"> 
+                    <div className="relative lg:bottom-16">
                         <h3
                             style={{ fontFamily: "Futura LT Book" }}
                             className="text-xl font-normal  text-[#5B4D43]">Address</h3>
