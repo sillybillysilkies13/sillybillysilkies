@@ -3,8 +3,7 @@ import { CgSpinner } from "react-icons/cg";
 import { DndContext, closestCenter, MouseSensor, TouchSensor, useSensor, useSensors } from "@dnd-kit/core";
 import { arrayMove, SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import SortableGoatCard from "./SortableGoatCard";
-
-const API_BASE = "https://backend.sillybillysilkies.workers.dev";
+import { API_BASE, offerToPublish } from "../../utils/backend";
 
 const GoatsManagement = () => {
     const [goats, setGoats] = useState([]);
@@ -20,7 +19,7 @@ const GoatsManagement = () => {
         line1: "",
         line2: "",
         line3: "",
-        section: "existing",
+        section: "for_sale",
         image: "",
         imageFile: null,
     });
@@ -127,9 +126,12 @@ const GoatsManagement = () => {
             const response = await fetch(`${API_BASE}/goats/add`, { method: "POST", body: formData });
             if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
             await fetchGoats();
-            setNewGoat({ line1: "", line2: "", line3: "", section: "existing", image: "", imageFile: null });
+            setNewGoat({ line1: "", line2: "", line3: "", section: "for_sale", image: "", imageFile: null });
+            setIsAdding(false);
+            await offerToPublish("Goat");
         } catch (error) {
             console.error("Error adding goat:", error);
+            alert("Failed to add goat. Please try again.");
         } finally {
             setIsAdding(false);
         }
@@ -137,9 +139,9 @@ const GoatsManagement = () => {
 
     // Save goat updates
     const handleSaveGoat = async (id) => {
-        setSavingId(id);
         const goat = goats.find(g => g.id === id);
         if (!goat) return;
+        setSavingId(id);
 
         const formData = new FormData();
         formData.append("id", id);
@@ -156,8 +158,11 @@ const GoatsManagement = () => {
             const response = await fetch(`${API_BASE}/goats/update`, { method: "PUT", body: formData });
             if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
             await fetchGoats();
+            setSavingId(null);
+            await offerToPublish("Goat");
         } catch (error) {
             console.error("Error updating goat:", error);
+            alert("Failed to save goat. Please try again.");
         } finally {
             setSavingId(null);
         }
@@ -399,8 +404,8 @@ const GoatsManagement = () => {
                             onChange={(e) => handleNewGoatChange("section", e.target.value)}
                             className="w-full text-[#4A3B2D] border border-[#4A3B2D] p-2 rounded"
                         >
-                            <option value="existing">Gallery Goats</option>
                             <option value="for_sale">Goats for Sale</option>
+                            <option value="existing">Gallery Goats</option>
                         </select>
                     </div>
                     <button

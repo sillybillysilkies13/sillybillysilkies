@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { FaEye, FaTrash } from "react-icons/fa";
 import { ImSpinner2 } from "react-icons/im";
+import { sendEmail } from "../../utils/backend";
 
 const FormResponsesDashboard = () => {
     const [responses, setResponses] = useState([]);
@@ -46,15 +47,8 @@ const FormResponsesDashboard = () => {
         setSendingReply(true);
 
         try {
-            const formData = new FormData();
-            formData.append("to", selectedResponse.email);
-            formData.append("subject", subject);
-            formData.append("message", replyMessage);
-
-            await fetch("https://backend.sillybillysilkies.workers.dev/sendmail", {
-                method: "POST",
-                body: formData, // FormData automatically sets the correct Content-Type
-            });
+            // Throws when the mailer reports an error, so failures are no longer shown as "sent".
+            await sendEmail({ to: selectedResponse.email, subject, message: replyMessage });
 
             alert("Reply sent successfully!");
             setReplyMessage("");

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { API_BASE, isAdminLoggedIn, saveAdminSession } from "../../utils/backend";
 
 function Login() {
     const [email, setEmail] = useState("");
@@ -9,8 +10,7 @@ function Login() {
     const navigate = useNavigate();
 
     useEffect(() => {
-        const isAdmin = localStorage.getItem("isAdmin") === "true";
-        if (isAdmin) {
+        if (isAdminLoggedIn()) {
             navigate("/admin");
         }
     }, [navigate]);
@@ -26,7 +26,7 @@ function Login() {
         setLoading(true); // Start loading animation
 
         try {
-            const response = await fetch("https://backend.sillybillysilkies.workers.dev/login", {
+            const response = await fetch(`${API_BASE}/login`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ email, password }),
@@ -34,8 +34,8 @@ function Login() {
 
             const data = await response.json();
 
-            if (data.success) {
-                localStorage.setItem("isAdmin", "true");
+            if (data.success && data.token) {
+                saveAdminSession({ token: data.token, expiresAt: data.expiresAt });
                 navigate("/admin");
             } else {
                 setError(data.error || "Invalid credentials");

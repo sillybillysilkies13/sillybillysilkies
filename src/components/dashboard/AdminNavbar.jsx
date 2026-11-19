@@ -4,6 +4,7 @@ import { Menu, X } from "lucide-react"; // Import icons
 import { motion } from "framer-motion"; // Smooth animations
 import axios from "axios"; // HTTP requests
 import { Pencil } from "lucide-react"; // Import pen icon
+import { clearAdminSession, publishWebsite, PUBLISH_STARTED_MESSAGE } from "../../utils/backend";
 
 function AdminNavbar() {
     const [isOpen, setIsOpen] = useState(false);
@@ -34,10 +35,10 @@ function AdminNavbar() {
             console.log("🔄 Triggering site redeploy...");
 
             // Call Cloudflare Worker Deploy Hook
-            await axios.post("https://backend.sillybillysilkies.workers.dev/deploy");
+            await publishWebsite();
 
             console.log("✅ Redeployment triggered successfully!");
-            alert("Deployment started! The site will be updated shortly.");
+            alert(PUBLISH_STARTED_MESSAGE);
 
             // Remove admin flag and redirect
             // localStorage.removeItem("isAdmin");
@@ -49,7 +50,7 @@ function AdminNavbar() {
     };
     const handleLogout = () => {
         try {
-            localStorage.removeItem("isAdmin");
+            clearAdminSession();
             navigate("/");
         } catch (error) {
             console.log(error);
@@ -183,7 +184,7 @@ function AdminNavbar() {
                         {/* Save & Exit Button (Visible in Mobile Menu) */}
                         <div className="flex w-full gap-4">
                             <button className="mt-8 w-full border text-[#754E1A] cursor-pointer bg-white py-3 rounded" onClick={handleSaveAndExit}>
-                                Save & Exit
+                                Update Website
                             </button>
                             <button className="mt-8 w-full bg-[#754E1A] cursor-pointer hover:bg-[#5f482a] text-white  py-3 rounded" onClick={handleLogout}>
                                 Logout

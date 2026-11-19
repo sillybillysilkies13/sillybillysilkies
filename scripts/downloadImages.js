@@ -3,6 +3,7 @@ import path from "path";
 import axios from "axios";
 import http from "http";
 import https from "https";
+import crypto from "crypto";
 import { fileURLToPath } from "url";
 
 // Get directory path
@@ -100,6 +101,23 @@ const jsonUrls = {
 };
 
 /**
+ * Builds the saved file name for a downloaded image. A short hash of the source URL
+ * is part of the name, so when a photo is replaced in the admin (the backend gives every
+ * upload a new URL) the website serves it at a NEW address. Reusing the old address let
+ * browsers/CDN keep showing the previous photo.
+ */
+function staticFilename(baseName, sourceUrl) {
+    const hash = crypto.createHash("sha1").update(String(sourceUrl)).digest("hex").slice(0, 10);
+    let ext = "";
+    try {
+        ext = path.extname(new URL(sourceUrl, "https://x").pathname);
+    } catch {
+        ext = path.extname(String(sourceUrl).split("?")[0]);
+    }
+    return `${baseName}-${hash}${(ext || ".jpg").toLowerCase()}`;
+}
+
+/**
  * Downloads an image and saves it in `public/static-images/` under the correct subdirectory
  */
 async function downloadImage(url, folder, filename) {
@@ -182,8 +200,7 @@ async function processJson(key, url) {
         if (key === "homepage" && data.images) {
             console.log(`📸 Processing homepage images`);
             data.images = await downloadWithConcurrency(data.images, async (image) => {
-                const ext = path.extname(image.url);
-                const filename = `${image.id}${ext}`;
+                const filename = staticFilename(image.id, image.url);
                 const relativePath = await downloadImage(image.url, "homepage", filename);
 
                 return { ...image, url: relativePath };
@@ -202,9 +219,8 @@ async function processJson(key, url) {
 
                     // Process each image in the sorted order
                     const processedImages = await downloadWithConcurrency(sortedImages, async (imageObj, index) => {
-                        const ext = path.extname(imageObj.url);
                         const order = imageObj.order;
-                        const filename = `${bunny.id}-${order}${ext}`;
+                        const filename = staticFilename(`${bunny.id}-${order}`, imageObj.url);
                         const relativePath = await downloadImage(imageObj.url, breedFolder, filename);
 
                         return {
@@ -230,9 +246,8 @@ async function processJson(key, url) {
 
                     // Process each image in the sorted order
                     const processedImages = await downloadWithConcurrency(sortedImages, async (imageObj, index) => {
-                        const ext = path.extname(imageObj.url);
                         const order = imageObj.order;
-                        const filename = `${bunny.id}-${order}${ext}`;
+                        const filename = staticFilename(`${bunny.id}-${order}`, imageObj.url);
                         const relativePath = await downloadImage(imageObj.url, breedFolder, filename);
 
                         return {
@@ -253,9 +268,8 @@ async function processJson(key, url) {
 
                     // Process each image and add order based on array index
                     const processedImages = await downloadWithConcurrency(bunny.images, async (imageUrl, index) => {
-                        const ext = path.extname(imageUrl);
                         const order = index + 1;
-                        const filename = `${bunny.id}-${order}${ext}`;
+                        const filename = staticFilename(`${bunny.id}-${order}`, imageUrl);
                         const relativePath = await downloadImage(imageUrl, breedFolder, filename);
 
                         return {
@@ -276,9 +290,8 @@ async function processJson(key, url) {
 
                     // Process each image in the sorted order
                     const processedImages = await downloadWithConcurrency(sortedImages, async (imageObj) => {
-                        const ext = path.extname(imageObj.url);
                         const order = imageObj.order;
-                        const filename = `${bunny.id}-${order}${ext}`;
+                        const filename = staticFilename(`${bunny.id}-${order}`, imageObj.url);
                         const relativePath = await downloadImage(imageObj.url, breedFolder, filename);
 
                         return {
@@ -299,8 +312,7 @@ async function processJson(key, url) {
             for (let bunny of data.bunnies) {
                 if (bunny.images) {
                     bunny.images = await downloadWithConcurrency(bunny.images, async (imageUrl, index) => {
-                        const ext = path.extname(imageUrl);
-                        const filename = `${bunny.id}-${index + 1}${ext}`;
+                        const filename = staticFilename(`${bunny.id}-${index + 1}`, imageUrl);
                         return await downloadImage(imageUrl, breedFolder, filename);
                     });
                 }
@@ -310,8 +322,7 @@ async function processJson(key, url) {
             for (let petId in data.pets) {
                 let pet = data.pets[petId];
                 if (pet.image_url) {
-                    const ext = path.extname(pet.image_url);
-                    const filename = `${petId}${ext}`;
+                    const filename = staticFilename(petId, pet.image_url);
                     pet.image_url = await downloadImage(pet.image_url, "gallery", filename);
                 }
             }
@@ -319,8 +330,7 @@ async function processJson(key, url) {
             console.log(`🐐 Processing goat images`);
             for (let goat of data.goats) {
                 if (goat.image) {
-                    const ext = path.extname(goat.image);
-                    const filename = `${goat.id}${ext}`;
+                    const filename = staticFilename(goat.id, goat.image);
                     goat.image = await downloadImage(goat.image, "goats", filename);
                 }
             }
@@ -329,8 +339,7 @@ async function processJson(key, url) {
             console.log(`📸 Processing profile image...`);
 
             const profileImageUrl = data.imageUrl;
-            const ext = path.extname(profileImageUrl);
-            const filename = `profile${ext}`; // Standard filename
+            const filename = staticFilename("profile", profileImageUrl);
 
             // Download image and get relative path
             const relativePath = await downloadImage(profileImageUrl, "profile", filename);

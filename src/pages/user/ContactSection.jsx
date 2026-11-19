@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { API_BASE } from "../../utils/backend";
 
 const ContactSection = () => {
     const [formData, setFormData] = useState({
@@ -23,7 +24,7 @@ const ContactSection = () => {
         setError(null);
 
         try {
-            const response = await fetch("https://backend.sillybillysilkies.workers.dev/submit", {
+            const response = await fetch(`${API_BASE}/submit`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -35,6 +36,7 @@ const ContactSection = () => {
                 throw new Error("Failed to send message. Please try again.");
             }
 
+            // The backend saves the message and emails a copy to the farm's inbox.
             setSuccess(true);
             setFormData({ firstName: "", lastName: "", email: "", message: "" });
         } catch (err) {

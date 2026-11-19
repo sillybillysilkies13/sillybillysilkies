@@ -18,6 +18,7 @@ import {
     verticalListSortingStrategy
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import { offerToPublish } from "../../utils/backend";
 
 const SortableImage = ({ img, index, onDelete }) => {
     const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id: img });
@@ -299,8 +300,6 @@ const AddNewBunny = () => {
 
                 // Update the image order in KV
                 await updateImagesOrder(sortedImages, id, `breeds/${bunny.breed.toLowerCase().replace(/\s+/g, "_")}`);
-
-                alert("Bunny updated successfully!");
             } else {
                 const details = JSON.stringify({
                     breed: bunny.breed,
@@ -337,11 +336,12 @@ const AddNewBunny = () => {
 
                 // Update the image order in KV with the new bunny ID
                 await updateImagesOrder(sortedImages, responseData.id, `breeds/${bunny.breed.toLowerCase().replace(/\s+/g, "_")}`);
-
-                alert("Bunny added successfully!");
             }
 
             setIsSubmitted(true);
+            setLoading(false);
+            // Saved data only reaches the public site after the website is rebuilt.
+            await offerToPublish(id ? "Bunny" : "New bunny");
             navigate("/admin/manage-listing");
         } catch (error) {
             console.error("Error submitting data:", error);
